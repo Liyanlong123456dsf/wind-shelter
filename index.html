@@ -1,1193 +1,1760 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>林间聊愈室 · 全链路产品卡点地图</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<style>
-  /* ─── Design Tokens (Apple-inspired, forest theme) ─── */
-  :root {
-    /* Backgrounds */
-    --bg-dark:      #000000;
-    --bg-dark-2:    #0a0a0a;
-    --bg-dark-3:    #141414;
-    --bg-dark-4:    #1c1c1e;
-    --bg-light:     #f5f5f7;
-    --bg-light-2:   #e8e8ed;
-
-    /* Text */
-    --text-dark:    #f5f5f7;
-    --text-dark-2:  rgba(245,245,247,0.65);
-    --text-dark-3:  rgba(245,245,247,0.4);
-    --text-light:   #1d1d1f;
-    --text-light-2: rgba(29,29,31,0.65);
-    --text-light-3: rgba(29,29,31,0.4);
-
-    /* Accent — calm forest green (healing theme) */
-    --accent:       #30d158;
-    --accent-hover: #3de064;
-    --accent-muted: rgba(48,209,88,0.15);
-    --accent-text:  #30d158;
-
-    /* Interactive */
-    --link-dark:   #2997ff;
-    --link-light:  #0066cc;
-    --btn-blue:     #0071e3;
-    --btn-blue-hover: #0077ed;
-
-    /* Borders */
-    --border-dark:  rgba(245,245,247,0.1);
-    --border-light: rgba(0,0,0,0.08);
-
-    /* Glass nav */
-    --nav-bg:       rgba(10,10,10,0.8);
-    --nav-blur:     saturate(180%) blur(20px);
-
-    /* Font */
-    --font: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', Helvetica Neue, Arial, sans-serif;
-
-    /* Spacing */
-    --space-xs:  4px;
-    --space-sm:  8px;
-    --space-md:  16px;
-    --space-lg:  24px;
-    --space-xl:  40px;
-    --space-2xl: 64px;
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  html, body { height: 100%; }
-
-  body {
-    font-family: var(--font);
-    background: var(--bg-dark);
-    color: var(--text-dark);
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    height: 100%;
-    overflow: hidden;
-  }
-
-  /* ─── App Layout ─── */
-  .app {
-    display: flex;
-    height: 100vh;
-    overflow: hidden;
-  }
-
-  /* ─── Sidebar Navigation (Apple glass nav style) ─── */
-  .sidebar {
-    width: 296px;
-    min-width: 296px;
-    background: var(--nav-bg);
-    backdrop-filter: var(--nav-blur);
-    -webkit-backdrop-filter: var(--nav-blur);
-    border-right: 1px solid var(--border-dark);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    position: relative;
-    z-index: 10;
-  }
-
-  .sidebar-header {
-    padding: 28px var(--space-lg) 20px;
-    border-bottom: 1px solid var(--border-dark);
-    flex-shrink: 0;
-  }
-
-  .sidebar-logo {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text-dark);
-    letter-spacing: -0.01em;
-    line-height: 1.3;
-    margin-bottom: 16px;
-  }
-
-  .sidebar-logo span {
-    display: block;
-    font-size: 11px;
-    font-weight: 400;
-    color: var(--text-dark-2);
-    letter-spacing: 0.02em;
-    margin-top: 2px;
-  }
-
-  /* Progress bar */
-  .progress-wrap {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .progress-label {
-    font-size: 11px;
-    font-weight: 500;
-    color: var(--text-dark-3);
-    white-space: nowrap;
-    letter-spacing: 0.02em;
-  }
-  .progress-track {
-    flex: 1;
-    height: 4px;
-    background: var(--border-dark);
-    border-radius: 2px;
-    overflow: hidden;
-  }
-  .progress-fill {
-    height: 100%;
-    background: var(--accent);
-    border-radius: 2px;
-    transition: width 0.6s cubic-bezier(0.25, 0.1, 0.25, 1);
-    width: 0%;
-  }
-  .progress-pct {
-    font-size: 11px;
-    font-weight: 500;
-    color: var(--accent);
-    min-width: 34px;
-    text-align: right;
-    font-variant-numeric: tabular-nums;
-  }
-
-  /* Sidebar Nav List */
-  .sidebar-nav {
-    flex: 1;
-    overflow-y: auto;
-    padding: var(--space-sm) 0 var(--space-xl);
-  }
-
-  .sidebar-nav::-webkit-scrollbar { width: 4px; }
-  .sidebar-nav::-webkit-scrollbar-track { background: transparent; }
-  .sidebar-nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
-
-  .nav-chapter {
-    margin-bottom: 2px;
-  }
-
-  .nav-chapter-btn {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 9px var(--space-lg);
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    color: var(--text-dark-2);
-    font-size: 13px;
-    font-family: var(--font);
-    text-align: left;
-    transition: color 0.15s, background 0.15s;
-    border-radius: 6px;
-    position: relative;
-    line-height: 1.4;
-  }
-
-  .nav-chapter-btn:hover {
-    color: var(--text-dark);
-    background: rgba(255,255,255,0.04);
-  }
-
-  .nav-chapter-btn.active {
-    color: var(--text-dark);
-    background: var(--accent-muted);
-  }
-
-  .nav-chapter-btn .chapter-icon {
-    font-size: 14px;
-    flex-shrink: 0;
-    width: 20px;
-    text-align: center;
-  }
-
-  .nav-chapter-btn .chapter-title {
-    flex: 1;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .nav-chapter-btn .chapter-num {
-    font-size: 10px;
-    color: var(--text-dark-3);
-    font-weight: 500;
-    flex-shrink: 0;
-    margin-right: 4px;
-  }
-
-  .nav-chapter-btn .chapter-status {
-    font-size: 10px;
-    font-weight: 600;
-    color: var(--accent);
-    flex-shrink: 0;
-    min-width: 28px;
-    text-align: right;
-  }
-
-  .nav-chapter-btn .chapter-status.done {
-    color: var(--accent);
-  }
-
-  .nav-chapter-btn .expand-icon {
-    font-size: 10px;
-    color: var(--text-dark-3);
-    flex-shrink: 0;
-    transition: transform 0.2s;
-    width: 16px;
-    text-align: center;
-  }
-
-  .nav-chapter-btn.expanded .expand-icon {
-    transform: rotate(90deg);
-  }
-
-  /* Task list under each chapter */
-  .nav-tasks {
-    display: none;
-    padding: 2px 0 6px 36px;
-  }
-
-  .nav-tasks.open { display: block; }
-
-  .nav-task {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    padding: 5px var(--space-lg) 5px 0;
-    cursor: pointer;
-    transition: opacity 0.15s;
-  }
-
-  .nav-task:hover { opacity: 0.8; }
-
-  .nav-task-cb {
-    width: 16px;
-    height: 16px;
-    border: 1.5px solid var(--border-dark);
-    border-radius: 4px;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-top: 1px;
-    transition: background 0.15s, border-color 0.15s;
-    background: transparent;
-  }
-
-  .nav-task.done .nav-task-cb {
-    background: var(--accent);
-    border-color: var(--accent);
-  }
-
-  .nav-task-cb::after {
-    content: '';
-    display: none;
-    width: 8px;
-    height: 5px;
-    border-left: 1.5px solid #fff;
-    border-bottom: 1.5px solid #fff;
-    transform: rotate(-45deg) translateY(-1px);
-  }
-
-  .nav-task.done .nav-task-cb::after { display: block; }
-
-  .nav-task-text {
-    font-size: 11.5px;
-    color: var(--text-dark-2);
-    line-height: 1.5;
-    flex: 1;
-  }
-
-  .nav-task.done .nav-task-text {
-    color: var(--text-dark-3);
-    text-decoration: line-through;
-    text-decoration-color: rgba(245,245,247,0.2);
-  }
-
-  /* ─── Main Content Area ─── */
-  .main {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    background: var(--bg-dark);
-  }
-
-  /* Top Bar */
-  .topbar {
-    height: 52px;
-    display: flex;
-    align-items: center;
-    padding: 0 var(--space-xl);
-    border-bottom: 1px solid var(--border-dark);
-    flex-shrink: 0;
-    gap: var(--space-lg);
-  }
-
-  .topbar-title {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text-dark);
-    letter-spacing: -0.01em;
-  }
-
-  .topbar-breadcrumb {
-    font-size: 12px;
-    color: var(--text-dark-2);
-    letter-spacing: -0.005em;
-  }
-
-  .topbar-right {
-    margin-left: auto;
-    display: flex;
-    gap: var(--space-sm);
-    align-items: center;
-  }
-
-  .btn {
-    padding: 6px 14px;
-    border-radius: 8px;
-    border: none;
-    font-size: 12px;
-    font-weight: 500;
-    font-family: var(--font);
-    cursor: pointer;
-    transition: background 0.15s, color 0.15s;
-    letter-spacing: -0.01em;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-  }
-
-  .btn-ghost {
-    background: rgba(255,255,255,0.06);
-    color: var(--text-dark-2);
-    border: 1px solid var(--border-dark);
-  }
-  .btn-ghost:hover { background: rgba(255,255,255,0.1); color: var(--text-dark); }
-
-  .btn-accent {
-    background: var(--accent);
-    color: #000;
-    font-weight: 600;
-  }
-  .btn-accent:hover { background: var(--accent-hover); }
-
-  /* Content Scroll */
-  .content-scroll {
-    flex: 1;
-    overflow-y: auto;
-    padding: 0 var(--space-xl) var(--space-xl);
-  }
-
-  .content-scroll::-webkit-scrollbar { width: 6px; }
-  .content-scroll::-webkit-scrollbar-track { background: transparent; }
-  .content-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
-
-  /* ─── Welcome State ─── */
-  .welcome {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    text-align: center;
-    gap: var(--space-md);
-  }
-
-  .welcome-icon {
-    font-size: 64px;
-    line-height: 1;
-    margin-bottom: var(--space-sm);
-  }
-
-  .welcome h2 {
-    font-size: 32px;
-    font-weight: 600;
-    letter-spacing: -0.03em;
-    color: var(--text-dark);
-    line-height: 1.1;
-  }
-
-  .welcome p {
-    font-size: 15px;
-    color: var(--text-dark-2);
-    line-height: 1.6;
-    max-width: 320px;
-  }
-
-  .welcome-stat {
-    display: flex;
-    gap: var(--space-xl);
-    margin-top: var(--space-md);
-  }
-
-  .welcome-stat-item {
-    text-align: center;
-  }
-
-  .welcome-stat-num {
-    font-size: 40px;
-    font-weight: 700;
-    color: var(--accent);
-    letter-spacing: -0.04em;
-    line-height: 1;
-  }
-
-  .welcome-stat-label {
-    font-size: 11px;
-    color: var(--text-dark-3);
-    margin-top: 4px;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-  }
-
-  /* ─── Chapter Content ─── */
-  .chapter-content {
-    max-width: 780px;
-    padding-top: var(--space-2xl);
-  }
-
-  .chapter-hero {
-    margin-bottom: var(--space-xl);
-    padding-bottom: var(--space-xl);
-    border-bottom: 1px solid var(--border-dark);
-  }
-
-  .chapter-eyebrow {
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--accent);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    margin-bottom: var(--space-sm);
-  }
-
-  .chapter-heading {
-    font-size: 48px;
-    font-weight: 700;
-    letter-spacing: -0.04em;
-    line-height: 1.05;
-    color: var(--text-dark);
-    margin-bottom: var(--space-sm);
-  }
-
-  .chapter-subheading {
-    font-size: 17px;
-    font-weight: 400;
-    color: var(--text-dark-2);
-    line-height: 1.5;
-    letter-spacing: -0.01em;
-  }
-
-  .chapter-progress-strip {
-    display: flex;
-    align-items: center;
-    gap: var(--space-md);
-    margin-top: var(--space-lg);
-    padding: var(--space-md) var(--space-lg);
-    background: var(--bg-dark-3);
-    border-radius: 10px;
-    border: 1px solid var(--border-dark);
-  }
-
-  .strip-label {
-    font-size: 12px;
-    color: var(--text-dark-2);
-    white-space: nowrap;
-  }
-
-  .strip-track {
-    flex: 1;
-    height: 4px;
-    background: var(--border-dark);
-    border-radius: 2px;
-    overflow: hidden;
-  }
-
-  .strip-fill {
-    height: 100%;
-    background: var(--accent);
-    border-radius: 2px;
-    transition: width 0.6s cubic-bezier(0.25, 0.1, 0.25, 1);
-  }
-
-  .strip-num {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--accent);
-    white-space: nowrap;
-    font-variant-numeric: tabular-nums;
-  }
-
-  /* Section Blocks */
-  .section-block {
-    margin-bottom: var(--space-xl);
-  }
-
-  .section-block:last-child { margin-bottom: 0; }
-
-  .section-label {
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--text-dark-3);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    margin-bottom: var(--space-md);
-    padding-bottom: var(--space-sm);
-    border-bottom: 1px solid var(--border-dark);
-  }
-
-  /* Tasks Grid */
-  .tasks-grid {
-    display: grid;
-    gap: var(--space-sm);
-  }
-
-  .task-card {
-    display: flex;
-    align-items: flex-start;
-    gap: var(--space-md);
-    padding: 14px var(--space-lg);
-    background: var(--bg-dark-3);
-    border: 1px solid var(--border-dark);
-    border-radius: 10px;
-    cursor: pointer;
-    transition: background 0.15s, border-color 0.15s, transform 0.15s;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .task-card::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 3px;
-    background: var(--accent);
-    opacity: 0;
-    transition: opacity 0.15s;
-  }
-
-  .task-card:hover {
-    background: var(--bg-dark-4);
-    border-color: rgba(48,209,88,0.2);
-    transform: translateX(2px);
-  }
-
-  .task-card:hover::before { opacity: 1; }
-
-  .task-card.checked {
-    background: rgba(48,209,88,0.06);
-    border-color: rgba(48,209,88,0.2);
-  }
-
-  .task-card.checked::before { opacity: 1; }
-
-  .task-card-cb {
-    width: 20px;
-    height: 20px;
-    border: 1.5px solid rgba(255,255,255,0.15);
-    border-radius: 5px;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-top: 1px;
-    transition: background 0.15s, border-color 0.15s;
-    background: transparent;
-  }
-
-  .task-card.checked .task-card-cb {
-    background: var(--accent);
-    border-color: var(--accent);
-  }
-
-  .task-card-cb svg {
-    width: 10px;
-    height: 8px;
-    display: none;
-    fill: none;
-    stroke: #000;
-    stroke-width: 2.5;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-  }
-
-  .task-card.checked .task-card-cb svg { display: block; }
-
-  .task-card-body { flex: 1; min-width: 0; }
-
-  .task-card-title {
-    font-size: 13.5px;
-    font-weight: 500;
-    color: var(--text-dark);
-    line-height: 1.5;
-    letter-spacing: -0.01em;
-    margin-bottom: 3px;
-  }
-
-  .task-card.checked .task-card-title {
-    color: var(--text-dark-3);
-    text-decoration: line-through;
-    text-decoration-color: rgba(245,245,247,0.15);
-  }
-
-  .task-card-meta {
-    font-size: 11px;
-    color: var(--text-dark-3);
-    letter-spacing: 0.02em;
-  }
-
-  .task-card-index {
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--text-dark-3);
-    font-variant-numeric: tabular-nums;
-    flex-shrink: 0;
-    margin-top: 2px;
-  }
-
-  /* Content Typography */
-  .chapter-content p {
-    font-size: 14px;
-    color: var(--text-dark-2);
-    line-height: 1.7;
-    letter-spacing: -0.005em;
-    margin-bottom: var(--space-md);
-  }
-
-  .chapter-content ul, .chapter-content ol {
-    padding-left: var(--space-lg);
-    margin-bottom: var(--space-md);
-  }
-
-  .chapter-content li {
-    font-size: 14px;
-    color: var(--text-dark-2);
-    line-height: 1.7;
-    margin-bottom: 6px;
-    letter-spacing: -0.005em;
-  }
-
-  .chapter-content li strong {
-    color: var(--text-dark);
-    font-weight: 600;
-  }
-
-  .chapter-content blockquote {
-    background: var(--bg-dark-3);
-    border-left: 3px solid var(--accent);
-    border-radius: 0 8px 8px 0;
-    padding: var(--space-md) var(--space-lg);
-    margin: var(--space-md) 0;
-    font-size: 14px;
-    color: var(--text-dark);
-    line-height: 1.7;
-    letter-spacing: -0.005em;
-    font-style: normal;
-  }
-
-  .chapter-content pre {
-    background: var(--bg-dark-3);
-    border: 1px solid var(--border-dark);
-    border-radius: 10px;
-    padding: var(--space-lg);
-    font-size: 12px;
-    line-height: 1.8;
-    overflow-x: auto;
-    white-space: pre;
-    color: var(--text-dark-2);
-    margin: var(--space-md) 0;
-    letter-spacing: -0.005em;
-  }
-
-  .chapter-content pre::-webkit-scrollbar { height: 4px; }
-  .chapter-content pre::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
-
-  /* Tables */
-  .table-wrap { overflow-x: auto; margin: var(--space-md) 0; border-radius: 10px; overflow: hidden; border: 1px solid var(--border-dark); }
-  .chapter-content table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 12.5px;
-    line-height: 1.6;
-  }
-  .chapter-content th {
-    background: var(--bg-dark-3);
-    padding: 10px 14px;
-    text-align: left;
-    font-weight: 600;
-    color: var(--text-dark);
-    letter-spacing: -0.005em;
-    border-bottom: 1px solid var(--border-dark);
-    white-space: nowrap;
-  }
-  .chapter-content td {
-    padding: 10px 14px;
-    color: var(--text-dark-2);
-    border-bottom: 1px solid var(--border-dark);
-    vertical-align: top;
-    letter-spacing: -0.005em;
-  }
-  .chapter-content tr:last-child td { border-bottom: none; }
-  .chapter-content tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
-
-  /* Section title */
-  .section-heading {
-    font-size: 18px;
-    font-weight: 600;
-    color: var(--text-dark);
-    letter-spacing: -0.02em;
-    margin-bottom: var(--space-md);
-    line-height: 1.3;
-  }
-
-  /* ─── Footer ─── */
-  .content-footer {
-    border-top: 1px solid var(--border-dark);
-    padding: 12px var(--space-xl);
-    display: flex;
-    align-items: center;
-    gap: var(--space-lg);
-    font-size: 12px;
-    flex-shrink: 0;
-    background: var(--bg-dark);
-  }
-
-  .footer-stat {
-    color: var(--text-dark-2);
-    white-space: nowrap;
-  }
-
-  .footer-stat strong { color: var(--text-dark); font-weight: 600; }
-  .footer-stat span { color: var(--accent); font-weight: 600; }
-
-  .footer-bar { flex: 1; height: 3px; background: var(--border-dark); border-radius: 2px; overflow: hidden; }
-  .footer-bar-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.6s cubic-bezier(0.25,0.1,0.25,1); }
-
-  /* ─── Mobile ─── */
-  .mobile-toggle {
-    display: none;
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    z-index: 100;
-    width: 52px;
-    height: 52px;
-    border-radius: 50%;
-    background: var(--accent);
-    color: #000;
-    border: none;
-    font-size: 20px;
-    cursor: pointer;
-    box-shadow: 0 4px 20px rgba(48,209,88,0.4);
-    align-items: center;
-    justify-content: center;
-  }
-
-  @media (max-width: 768px) {
-    .sidebar {
-      position: fixed;
-      left: 0; top: 0; bottom: 0;
-      z-index: 200;
-      transform: translateX(-100%);
-      transition: transform 0.3s cubic-bezier(0.25,0.1,0.25,1);
-      width: 85vw;
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>林间聊愈室·全链路产品卡点地图 | 风筑小屋</title>
+  <style>
+    :root {
+      --bg: #F7F4EE;
+      --surface: #FFFFFF;
+      --sidebar-w: 280px;
+      --header-h: 60px;
+      --accent: #7A9E6B;
+      --accent2: #B8A88A;
+      --accent3: #8B9EC5;
+      --text: #3A3028;
+      --text2: #6B5E50;
+      --text-light: #9A8E80;
+      --border: #E5DDD0;
+      --paddington: #C4834A;
+      --nick: #6B8F71;
+      --eeyore: #7A8FA6;
+      --phase1: #D4956A;
+      --phase2: #7A9E6B;
+      --phase3: #6B8FB5;
+      --phase4: #9E7A6B;
+      --phase5: #8B7AA0;
+      --phase6: #6B9E8B;
+      --shadow: 0 2px 16px rgba(58,48,40,.08);
+      --radius: 14px;
     }
-    .sidebar.open { transform: translateX(0); }
-    .mobile-toggle { display: flex; }
-    .content-scroll { padding: 0 var(--space-md) var(--space-xl); }
-    .topbar { padding: 0 var(--space-md); }
-    .content-footer { padding: 10px var(--space-md); }
-    .chapter-heading { font-size: 32px; }
-    .welcome h2 { font-size: 24px; }
-    .welcome-stat { gap: var(--space-lg); }
-    .welcome-stat-num { font-size: 28px; }
-  }
-</style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
+
+    /* ── HEADER ── */
+    header {
+      position: fixed; top: 0; left: 0; right: 0; height: var(--header-h);
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; padding: 0 20px;
+      z-index: 100; gap: 16px; box-shadow: 0 1px 8px rgba(58,48,40,.06);
+    }
+    .header-logo { font-size: 15px; font-weight: 700; color: var(--accent); white-space: nowrap; }
+    .header-logo span { color: var(--text-light); font-weight: 400; font-size: 13px; margin-left: 6px; }
+    .progress-wrap { flex: 1; display: flex; align-items: center; gap: 10px; }
+    .progress-bar-wrap { flex: 1; height: 8px; background: var(--border); border-radius: 99px; overflow: hidden; }
+    .progress-bar { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 99px; transition: width .4s ease; width: 0%; }
+    .progress-pct { font-size: 13px; font-weight: 600; color: var(--accent); white-space: nowrap; min-width: 44px; }
+    .header-stats { display: flex; gap: 16px; align-items: center; }
+    .stat-chip { font-size: 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 20px; padding: 3px 10px; color: var(--text2); }
+    .stat-chip b { color: var(--accent); }
+    .header-actions { display: flex; gap: 8px; }
+    .btn-icon {
+      width: 32px; height: 32px; border: 1px solid var(--border); border-radius: 8px;
+      background: var(--surface); cursor: pointer; display: flex; align-items: center; justify-content: center;
+      font-size: 14px; color: var(--text2); transition: all .2s;
+    }
+    .btn-icon:hover { background: var(--bg); color: var(--text); }
+
+    /* ── LAYOUT ── */
+    .layout { display: flex; height: 100vh; padding-top: var(--header-h); }
+    aside {
+      width: var(--sidebar-w); min-width: var(--sidebar-w); height: 100%; overflow-y: auto;
+      background: var(--surface); border-right: 1px solid var(--border);
+      padding: 12px 0; display: flex; flex-direction: column;
+    }
+    aside::-webkit-scrollbar { width: 4px; }
+    aside::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    .sidebar-phase {
+      padding: 10px 16px 4px; font-size: 11px; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--text-light); margin-top: 8px;
+    }
+    .sidebar-item {
+      display: flex; align-items: center; gap: 8px; padding: 7px 16px; cursor: pointer;
+      font-size: 13px; color: var(--text2); border-left: 3px solid transparent;
+      transition: all .15s; user-select: none;
+    }
+    .sidebar-item:hover { background: var(--bg); color: var(--text); }
+    .sidebar-item.active { background: var(--bg); border-left-color: var(--accent); color: var(--text); font-weight: 600; }
+    .sidebar-item .si-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border); flex-shrink: 0; }
+    .sidebar-item .si-dot.done { background: var(--accent); }
+    .sidebar-item .si-dot.active { background: var(--accent2); }
+    .sidebar-item .si-num { font-size: 11px; color: var(--text-light); min-width: 20px; }
+    .sidebar-item .si-text { flex: 1; }
+    .sidebar-item .si-check { font-size: 11px; }
+    .sidebar-item .si-chevron { font-size: 10px; transition: transform .2s; margin-left: auto; }
+    .sidebar-item.open .si-chevron { transform: rotate(90deg); }
+
+    /* ── MAIN ── */
+    main { flex: 1; overflow-y: auto; padding: 24px 28px 60px; }
+    main::-webkit-scrollbar { width: 6px; }
+    main::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    /* Chapter hero */
+    .chapter-hero {
+      margin-bottom: 24px; padding: 24px 28px; background: var(--surface);
+      border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border);
+      position: relative; overflow: hidden;
+    }
+    .chapter-hero::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+    }
+    .chapter-hero.phase1::before { background: var(--phase1); }
+    .chapter-hero.phase2::before { background: var(--phase2); }
+    .chapter-hero.phase3::before { background: var(--phase3); }
+    .chapter-hero.phase4::before { background: var(--phase4); }
+    .chapter-hero.phase5::before { background: var(--phase5); }
+    .chapter-hero.phase6::before { background: var(--phase6); }
+    .chapter-hero.phaseA::before { background: var(--accent2); }
+    .chapter-num { font-size: 12px; font-weight: 700; color: var(--text-light); letter-spacing: .06em; text-transform: uppercase; margin-bottom: 4px; }
+    .chapter-title { font-size: 22px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+    .chapter-meta { font-size: 13px; color: var(--text2); display: flex; gap: 16px; flex-wrap: wrap; }
+    .chapter-meta span { display: flex; align-items: center; gap: 4px; }
+    .chapter-progress { margin-top: 14px; display: flex; align-items: center; gap: 10px; }
+    .chapter-progress-bar { flex: 1; height: 6px; background: var(--border); border-radius: 99px; overflow: hidden; }
+    .chapter-progress-fill { height: 100%; border-radius: 99px; transition: width .3s; }
+    .chapter-progress-pct { font-size: 12px; font-weight: 600; min-width: 36px; }
+
+    /* Section */
+    .section-card {
+      background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow);
+      border: 1px solid var(--border); margin-bottom: 16px; overflow: hidden;
+    }
+    .section-header {
+      padding: 14px 20px; display: flex; align-items: center; gap: 10px;
+      cursor: pointer; user-select: none; transition: background .15s;
+    }
+    .section-header:hover { background: var(--bg); }
+    .section-toggle { font-size: 16px; transition: transform .2s; color: var(--text2); }
+    .section-header.open .section-toggle { transform: rotate(90deg); }
+    .section-title { flex: 1; font-size: 14px; font-weight: 600; color: var(--text); }
+    .section-badge { font-size: 11px; background: var(--bg); border: 1px solid var(--border); border-radius: 20px; padding: 2px 8px; color: var(--text-light); }
+    .section-badge.done { background: var(--accent); color: white; border-color: var(--accent); }
+    .section-body { padding: 0 20px 16px; display: none; border-top: 1px solid var(--border); }
+    .section-body.open { display: block; }
+    .section-intro { padding: 12px 0 8px; font-size: 13px; color: var(--text2); line-height: 1.7; }
+
+    /* Task items */
+    .task-item {
+      display: flex; align-items: flex-start; gap: 10px; padding: 10px 0;
+      border-bottom: 1px solid var(--border); cursor: pointer;
+    }
+    .task-item:last-child { border-bottom: none; }
+    .task-item:hover .task-label { color: var(--text); }
+    .task-checkbox {
+      width: 20px; height: 20px; min-width: 20px; border: 2px solid var(--border);
+      border-radius: 6px; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all .2s; margin-top: 1px; font-size: 12px;
+    }
+    .task-item.done .task-checkbox { background: var(--accent); border-color: var(--accent); color: white; }
+    .task-content { flex: 1; }
+    .task-label { font-size: 13px; color: var(--text2); line-height: 1.5; transition: color .2s; }
+    .task-item.done .task-label { color: var(--text-light); text-decoration: line-through; }
+    .task-tag { display: inline-flex; align-items: center; gap: 3px; font-size: 10px; padding: 1px 6px; border-radius: 4px; margin-top: 3px; }
+    .task-tag.must { background: #FEF3C7; color: #92400E; }
+    .task-tag.later { background: #EFF6FF; color: #1E40AF; }
+    .task-tag.optional { background: #F3F4F6; color: #6B7280; }
+    .task-tag.risk { background: #FEE2E2; color: #991B1B; }
+
+    /* Character cards */
+    .char-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; padding: 8px 0; }
+    .char-card { border: 1px solid var(--border); border-radius: 12px; padding: 16px; transition: all .2s; cursor: default; }
+    .char-card:hover { box-shadow: 0 4px 16px rgba(58,48,40,.1); transform: translateY(-1px); }
+    .char-card.paddington { border-top: 3px solid var(--paddington); }
+    .char-card.nick { border-top: 3px solid var(--nick); }
+    .char-card.eeyore { border-top: 3px solid var(--eeyore); }
+    .char-name { font-size: 15px; font-weight: 700; margin-bottom: 2px; }
+    .char-card.paddington .char-name { color: var(--paddington); }
+    .char-card.nick .char-name { color: var(--nick); }
+    .char-card.eeyore .char-name { color: var(--eeyore); }
+    .char-sub { font-size: 11px; color: var(--text-light); margin-bottom: 8px; }
+    .char-quote { font-size: 12px; color: var(--text2); font-style: italic; line-height: 1.6; }
+
+    /* Quote blocks */
+    .quote-block {
+      background: var(--bg); border-left: 3px solid var(--accent2); border-radius: 0 8px 8px 0;
+      padding: 12px 16px; margin: 8px 0; font-size: 13px; color: var(--text2); line-height: 1.7;
+    }
+
+    /* Table */
+    .data-table { width: 100%; border-collapse: collapse; font-size: 12px; margin: 8px 0; }
+    .data-table th { background: var(--bg); padding: 8px 10px; text-align: left; font-weight: 600; border-bottom: 2px solid var(--border); color: var(--text2); }
+    .data-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); color: var(--text2); vertical-align: top; }
+    .data-table tr:last-child td { border-bottom: none; }
+
+    /* Source link */
+    .source-link { color: var(--accent); text-decoration: none; cursor: pointer; border-bottom: 1px solid transparent; transition: border-color .2s; font-size: 12px; }
+    .source-link:hover { border-bottom-color: var(--accent); }
+
+    /* Matrix */
+    .matrix { overflow-x: auto; }
+
+    /* Back to top */
+    .back-top {
+      position: fixed; bottom: 24px; right: 24px; width: 40px; height: 40px;
+      background: var(--accent); color: white; border: none; border-radius: 50%;
+      cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 16px rgba(122,158,107,.4); transition: all .2s; z-index: 50;
+    }
+    .back-top:hover { transform: scale(1.1); }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(58,48,40,.5); backdrop-filter: blur(4px);
+      z-index: 200; display: flex; align-items: center; justify-content: center; padding: 20px;
+      opacity: 0; pointer-events: none; transition: opacity .2s;
+    }
+    .modal-overlay.show { opacity: 1; pointer-events: all; }
+    .modal {
+      background: var(--surface); border-radius: var(--radius); max-width: 640px; width: 100%;
+      max-height: 80vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(58,48,40,.2);
+      transform: scale(.95); transition: transform .2s;
+    }
+    .modal-overlay.show .modal { transform: scale(1); }
+    .modal-head { padding: 20px 24px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .modal-title { font-size: 16px; font-weight: 700; }
+    .modal-close { width: 28px; height: 28px; border: none; background: var(--bg); border-radius: 50%; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; color: var(--text2); }
+    .modal-body { padding: 20px 24px; }
+    .modal-src { font-size: 13px; color: var(--text2); line-height: 1.8; }
+    .modal-src a { color: var(--accent); word-break: break-all; }
+
+    /* Phase legend */
+    .phase-legend { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+    .phase-dot { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text2); }
+    .phase-dot span { width: 10px; height: 10px; border-radius: 50%; }
+
+    /* Timeline */
+    .timeline { position: relative; padding-left: 24px; }
+    .timeline::before { content: ''; position: absolute; left: 6px; top: 0; bottom: 0; width: 2px; background: var(--border); }
+    .timeline-item { position: relative; margin-bottom: 20px; }
+    .timeline-item::before { content: ''; position: absolute; left: -18px; top: 6px; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); border: 2px solid var(--surface); }
+    .timeline-label { font-size: 11px; color: var(--text-light); font-weight: 600; margin-bottom: 2px; }
+    .timeline-text { font-size: 13px; color: var(--text2); line-height: 1.6; }
+
+    /* Subtasks in sections */
+    .subtask { padding: 8px 0; border-bottom: 1px solid var(--border); }
+    .subtask:last-child { border-bottom: none; }
+    .subtask-header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+    .subtask-title { font-size: 13px; font-weight: 600; color: var(--text); }
+    .subtask-check { width: 18px; height: 18px; border: 2px solid var(--border); border-radius: 5px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 11px; transition: all .2s; flex-shrink: 0; }
+    .subtask-check.done { background: var(--accent); border-color: var(--accent); color: white; }
+    .subtask-desc { font-size: 12px; color: var(--text2); line-height: 1.6; margin-left: 26px; }
+    .subtask-item.done .subtask-title { color: var(--text-light); text-decoration: line-through; }
+    .subtask-item.done .subtask-desc { color: var(--text-light); }
+
+    /* Emotion axis */
+    .axis-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .axis-card { border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+    .axis-card.anxiety { border-top: 3px solid var(--phase1); }
+    .axis-card.depression { border-top: 3px solid var(--phase4); }
+    .axis-title { font-size: 14px; font-weight: 700; margin-bottom: 8px; }
+    .axis-card.anxiety .axis-title { color: var(--phase1); }
+    .axis-card.depression .axis-title { color: var(--phase4); }
+    .axis-nodes { display: flex; flex-direction: column; gap: 6px; }
+    .axis-node { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text2); }
+    .axis-node-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); }
+    .axis-arrow { text-align: center; font-size: 11px; color: var(--text-light); margin: 4px 0; }
+
+    /* Empty */
+    .empty-state { text-align: center; padding: 80px 20px; }
+    .empty-state h3 { font-size: 18px; color: var(--text2); margin-bottom: 8px; }
+    .empty-state p { font-size: 13px; color: var(--text-light); }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      aside { display: none; }
+      .axis-grid { grid-template-columns: 1fr; }
+      .header-stats { display: none; }
+      .chapter-hero { padding: 16px; }
+      main { padding: 16px; }
+    }
+
+    /* Source modal link highlight */
+    a.src { color: var(--accent); text-decoration: none; border-bottom: 1px dashed var(--accent); cursor: pointer; font-size: 12px; }
+    a.src:hover { border-bottom-style: solid; }
+
+    /* Slide transition */
+    .fade-in { animation: fadeIn .3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Emoji in chapter hero */
+    .chapter-emoji { font-size: 28px; margin-bottom: 8px; }
+  </style>
 </head>
 <body>
-<div class="app">
 
-  <!-- Sidebar -->
-  <aside class="sidebar" id="sidebar">
-    <div class="sidebar-header">
-      <div class="sidebar-logo">
-        林间聊愈室
-        <span>全链路产品卡点地图 · v3.1</span>
-      </div>
-      <div class="progress-wrap">
-        <span class="progress-label">执行进度</span>
-        <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
-        <span class="progress-pct" id="progressPct">0%</span>
-      </div>
+<!-- HEADER -->
+<header>
+  <div class="header-logo">🌿 林间聊愈室<span>· 风筑小屋</span></div>
+  <div class="progress-wrap">
+    <div class="progress-bar-wrap"><div class="progress-bar" id="totalBar"></div></div>
+    <span class="progress-pct" id="totalPct">0%</span>
+  </div>
+  <div class="header-stats">
+    <div class="stat-chip">已完成 <b id="doneCount">0</b> / <span id="totalCount">0</span></div>
+    <div class="stat-chip">章节 <b id="doneChapters">0</b></div>
+  </div>
+  <div class="header-actions">
+    <button class="btn-icon" onclick="exportProgress()" title="导出进度">⬇</button>
+    <button class="btn-icon" onclick="resetProgress()" title="重置">↺</button>
+  </div>
+</header>
+
+<div class="layout">
+  <!-- SIDEBAR -->
+  <aside id="sidebar"></aside>
+
+  <!-- MAIN CONTENT -->
+  <main id="mainContent">
+    <div class="empty-state" id="emptyState">
+      <div class="chapter-emoji">🌿</div>
+      <h3>欢迎来到林间聊愈室</h3>
+      <p>从左侧选择一个章节开始<br/>点击小节点可标记执行状态</p>
     </div>
+    <div id="chapterContent" style="display:none"></div>
+  </main>
+</div>
 
-    <nav class="sidebar-nav" id="sidebarNav"></nav>
-  </aside>
-
-  <!-- Main -->
-  <div class="main">
-    <header class="topbar">
-      <div class="topbar-title">产品卡点地图</div>
-      <div class="topbar-breadcrumb" id="breadcrumb"></div>
-      <div class="topbar-right">
-        <button class="btn btn-ghost" onclick="resetAll()">
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 6a5 5 0 1 0 5-5 5 5 0 0 0-5 5z"/><path d="M6 3v3l2 1"/></svg>
-          重置
-        </button>
-        <button class="btn btn-accent" onclick="exportData()">
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v7M3 5l3 3 3-3"/><path d="M1 10h10v1H1z"/></svg>
-          导出
-        </button>
-      </div>
-    </header>
-
-    <div class="content-scroll" id="contentScroll">
-      <!-- Welcome -->
-      <div class="welcome" id="welcome">
-        <div class="welcome-icon">🌿</div>
-        <h2>选择左侧章节<br>开始追踪执行</h2>
-        <p>25个核心章节 · 125+可执行节点<br>点击勾选，进度自动保存</p>
-        <div class="welcome-stat">
-          <div class="welcome-stat-item">
-            <div class="welcome-stat-num" id="welcomeDone">0</div>
-            <div class="welcome-stat-label">已完成</div>
-          </div>
-          <div class="welcome-stat-item">
-            <div class="welcome-stat-num" id="welcomeTotal">0</div>
-            <div class="welcome-stat-label">总节点</div>
-          </div>
-          <div class="welcome-stat-item">
-            <div class="welcome-stat-num" id="welcomePct">0%</div>
-            <div class="welcome-stat-label">完成率</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Chapter Content -->
-      <div id="chapterContent" class="chapter-content" style="display:none;"></div>
+<!-- SOURCE MODAL -->
+<div class="modal-overlay" id="sourceModal" onclick="if(event.target===this)closeSourceModal()">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="modal-title">📎 信源详情</span>
+      <button class="modal-close" onclick="closeSourceModal()">✕</button>
     </div>
-
-    <footer class="content-footer" id="contentFooter" style="display:none;">
-      <div class="footer-stat">已完成 <strong id="doneCount">0</strong> / <span id="totalCount">0</span> 项</div>
-      <div class="footer-bar"><div class="footer-bar-fill" id="footerFill"></div></div>
-      <div class="footer-stat" id="footerPct">0%</div>
-    </footer>
+    <div class="modal-body">
+      <div class="modal-src" id="modalContent"></div>
+    </div>
   </div>
 </div>
 
-<button class="mobile-toggle" id="mobileToggle" onclick="toggleSidebar()">☰</button>
+<!-- BACK TO TOP -->
+<button class="back-top" onclick="window.mainContent.scrollTo({top:0,behavior:'smooth'})">↑</button>
 
 <script>
-/* ────────────────────────────────────────────
-   CHAPTER DATA — ALL 25 CHAPTERS + TASKS
-   ──────────────────────────────────────────── */
-const chapters = [
-  { id: 1, title: '项目定义', emoji: '📋', tasks: ['项目名称确认：林间聊愈室','一句话定位撰写完成','当前阶段目标定义（人设稳定/场景贴合/连续陪伴感/安全边界/留存体验）','差异化公式确立：一个能用的模型 + 极致的氛围感','角色感 / 氛围感 / 连续感 / 边界感 四层协同确认'], content: `<div class="section-block"><div class="section-heading">项目名称</div><p>林间聊愈室</p></div><div class="section-block"><div class="section-heading">一句话定位</div><blockquote>AI 氛围疗愈对话工具。用温柔、稳定、低压力的 AI 对话体验，陪伴年轻用户缓解社交焦虑与日常情绪压力。</blockquote></div><div class="section-block"><div class="section-heading">当前阶段目标</div><p>当前不是做一个"什么都能做的智能体"，而是优先做出一个：</p><ul><li>人设稳定</li><li>场景贴合</li><li>连续陪伴感成立</li><li>安全边界清晰</li><li>前台体验自然可留存</li></ul><p>的疗愈对话 MVP。</p></div><div class="section-block"><div class="section-heading">差异化公式</div><blockquote>一个能用的模型 + 极致的氛围感 = 产品差异化</blockquote><p>林间聊愈室的差异化，不依赖极限推理，不依赖复杂工具调用，而依赖四个层面的协同：</p><ul><li><strong>角色感：</strong>像一个稳定、克制、不评判的陪伴者</li><li><strong>氛围感：</strong>用户一进入就感到被放慢、被接住</li><li><strong>连续感：</strong>不是每次都像第一次见面</li><li><strong>边界感：</strong>温柔但不越界，陪伴但不冒充专业诊断</li></ul></div>` },
-  { id: 2, title: '市场与竞品分析', emoji: '🔍', tasks: ['AI情感陪伴赛道现状分析（Replika/Character.AI/星野/筑梦岛）','目标用户画像确认（18-35岁轻度情绪困扰人群）','三层用户模型建立（偶尔低落/持续困扰/需要专业帮助）','市场规模与可行性评估','直接竞品林间聊愈室产品结构分析','竞品横向对比表完成','高频正面/负面反馈整理','五大致命问题识别（记忆不一致/人设崩塌/模式化安慰/合规一刀切/ROI打不正）'], content: `<div class="section-block"><div class="section-heading">赛道现状</div><ul><li>2024-2025年大量AI陪伴产品涌现（Replika、Character.AI、星野、筑梦岛）</li><li>用户付费意愿显著提升：ARPU从$0.52增长到$1.18</li><li>用户需求演变：猎奇尝鲜 → 浅层陪伴 → 新鲜感消退（5-7天留存） → 深层链接需求</li></ul></div><div class="section-block"><div class="section-heading">五大致命问题</div><ul><li>记忆不一致 → 用户每次进来都像重新认识陌生人</li><li>人设崩塌 → 同一角色前后表现矛盾</li><li>模式化安慰 → 回复固定，用户感到"敷衍"</li><li>合规一刀切 → 粗暴过滤违禁词，用户感到"被监视"</li><li>ROI打不正 → token成本高于用户付费意愿</li></ul><blockquote>核心洞察：能活下来的产品，不是技术最强的，而是最能"让用户感到被记住"的。</blockquote></div><div class="section-block"><div class="section-heading">目标用户画像</div><div class="table-wrap"><table><tr><th>维度</th><th>描述</th></tr><tr><td>典型场景</td><td>工作压力、人际困扰、自我怀疑、生活无意义感</td></tr><tr><td>用户特征</td><td>18-35岁、有倾诉需求但不到心理咨询程度、不想被评判、渴望被理解</td></tr><tr><td>第一层（60%）</td><td>偶尔低落，需要被接住，不需要行动</td></tr><tr><td>第二层（30%）</td><td>持续困扰，需要被理解+轻度梳理</td></tr><tr><td>第三层（10%）</td><td>需要专业帮助，AI是入口不是出口</td></tr></table></div></div><div class="section-block"><div class="section-heading">竞品横向对比</div><div class="table-wrap"><table><tr><th>维度</th><th>林间聊愈室</th><th>Replika</th><th>Character.AI</th><th>星野/筑梦岛</th></tr><tr><td>角色数量</td><td>3个固定</td><td>1个自定义</td><td>大量预设</td><td>大量UGC</td></tr><tr><td>记忆深度</td><td>82维度</td><td>深度学习</td><td>短期记忆</td><td>短期记忆</td></tr><tr><td>角色一致性</td><td>高</td><td>中</td><td>低</td><td>低</td></tr><tr><td>中文体验</td><td>优</td><td>差</td><td>中</td><td>优</td></tr><tr><td>用户评分</td><td>4.9分</td><td>4.2分</td><td>3.8分</td><td>4.0分</td></tr></table></div></div>` },
-  { id: 3, title: '产品定位与边界', emoji: '🎯', tasks: ['核心定位确认（更深的懂得，记住你说的每一件事）','差异化矩阵完成（与竞品林间聊愈室对比）','三层用户模型正式确认','商业模式设计（Phase 1免费养口碑 → Phase 2订阅制 → Phase 3增值服务）','"要解决的问题"清单确认','"不解决的问题"边界定义（医疗诊断/药物建议/专业心理治疗替代等）','技术可行性评估完成','资源需求清单整理（技术团队/非技术团队/时间估算）','风险评估与对策表完成（角色一致性不达标/留存率低/安全事件/token成本）'], content: `<div class="section-block"><div class="section-heading">核心定位</div><blockquote>林间聊愈室不是"更多的功能"，而是"更深的懂得"——记住你说的每一件事，陪你走过的每一个低谷，然后在恰当的时候，轻轻推你一小步。</blockquote></div><div class="section-block"><div class="section-heading">差异化矩阵</div><div class="table-wrap"><table><tr><th>维度</th><th>林间聊愈室（竞品）</th><th>林间聊愈室（目标）</th></tr><tr><td>角色风格</td><td>动物萌系可爱</td><td>克制温柔（偏成熟用户）</td></tr><tr><td>核心差异化</td><td>多角色 + 读心卡牌</td><td>记忆深度 + 克制语气 + 微行动</td></tr><tr><td>目标用户</td><td>泛Z世代</td><td>轻度情绪困扰的年轻人/职场人</td></tr><tr><td>叙事深度</td><td>情绪旅行完整叙事</td><td>更轻量的情绪快照</td></tr><tr><td>行动支持</td><td>偏倾诉接收</td><td>倾诉 + 微行动双轨</td></tr></table></div></div><div class="section-block"><div class="section-heading">商业模式</div><ul><li><strong>Phase 1（0-6个月）：</strong>免费养口碑，目标：次日留存≥35%，7日留存≥20%</li><li><strong>Phase 2（6-12个月）：</strong>订阅制（¥15-22/月），付费转化率≥5%</li><li><strong>Phase 3（12个月+）：</strong>人工咨询服务入口、企业版、IP联名</li></ul></div><div class="section-block"><div class="section-heading">不解决的问题（边界）</div><blockquote>"它是生活化情绪陪伴产品，不是医疗产品，不是诊断产品，不是任务型智能体。"</blockquote><p>不解决：医疗诊断、药物建议，专业心理治疗替代、多工具任务执行、搜索型问答、泛知识助手场景。</p></div><div class="section-block"><div class="section-heading">风险评估</div><div class="table-wrap"><table><tr><th>风险</th><th>概率</th><th>影响</th><th>对策</th></tr><tr><td>角色一致性不达标</td><td>高</td><td>高</td><td>建立角色测试集，快速迭代prompt</td></tr><tr><td>用户留存率低</td><td>高</td><td>高</td><td>前3个月专注对话质量，不加功能</td></tr><tr><td>安全事件</td><td>低</td><td>极高</td><td>安全SOP优先于所有功能</td></tr><tr><td>token成本高于收入</td><td>中</td><td>中</td><td>早期免费，规模后再商业化</td></tr><tr><td>角色版权争议</td><td>低</td><td>中</td><td>考虑原创角色或购买授权</td></tr></table></div></div>` },
-  { id: 4, title: '首批核心场景', emoji: '🎬', tasks: ['5个高频场景确认（第一次进入新群体紧张/面试前焦虑/刚入职沟通压力/与朋友冲突后的内耗/家庭压力与自责）','每个场景的典型输入确认','5个场景选择原因分析（高频/易引发重复使用/可结构化支持/检验Prompt+RAG+记忆协同）','用户体验目标确认（它懂我卡在哪/不像客服老师/不说空话/记得我/给我小动作）'], content: `<div class="section-block"><div class="section-heading">5个核心场景</div><div class="table-wrap"><table><tr><th>#</th><th>场景</th><th>典型输入</th></tr><tr><td>1</td><td>第一次进入新群体紧张</td><td>"下周要去一个全是陌生人的聚会，我一想到就紧张"</td></tr><tr><td>2</td><td>面试前焦虑</td><td>"下周有个面试，我一直在想如果搞砸了怎么办"</td></tr><tr><td>3</td><td>刚入职沟通压力</td><td>"入职新公司两周了，还是不敢在群里说话，怕说错话"</td></tr><tr><td>4</td><td>与朋友冲突后的内耗</td><td>"和最好的朋友吵了一架，我一直在想是不是我的问题"</td></tr><tr><td>5</td><td>家庭压力与自责</td><td>"我妈又催我结婚了，每次打电话都很烦躁，但又觉得她也是为我好"</td></tr></table></div></div><div class="section-block"><div class="section-heading">选择原因</div><ul><li>高频（日常生活常见）</li><li>易引发重复使用（同一问题会反复出现）</li><li>容易通过知识卡做结构化支持</li><li>可以检验 Prompt / RAG / 记忆协同是否成立</li></ul></div><div class="section-block"><div class="section-heading">用户体验目标</div><blockquote>它懂我现在卡在哪 / 它不像客服，也不像老师 / 它不会一直说空话 / 它好像记得我 / 它会给我一个我现在做得到的小动作</blockquote></div>` },
-  { id: 5, title: 'MVP产品范围', emoji: '🚀', tasks: ['MVP目标定义（首轮体验成立/5个核心场景可用/多轮对话不明显漂移/记忆最小闭环/高风险安全切换稳定）','P0功能层确认（氛围疗愈对话/自然引导/跨对话最小记忆/高风险安全兜底/基础评测闭环）','P0系统层确认（系统Prompt/场景知识库/三层记忆最小可用子集/安全识别与固定处理规则/对话后摘要写入机制）','次版本能力清单确认（多角色切换/小动物来信/情绪快照卡/微行动跟进/语音输入/成长体系/会员商业化）'], content: `<div class="section-block"><div class="section-heading">MVP目标</div><p>MVP 不追求功能完整，而追求：</p><ul><li>首轮体验成立</li><li>5个核心场景可用</li><li>多轮对话不明显漂移</li><li>记忆有最小闭环</li><li>高风险场景安全切换稳定</li></ul></div><div class="section-block"><div class="section-heading">P0 功能层</div><ul><li>氛围疗愈对话</li><li>自然引导与情绪命名</li><li>跨对话最小记忆</li><li>高风险安全兜底</li><li>基础评测闭环</li></ul></div><div class="section-block"><div class="section-heading">P0 系统层</div><ul><li>系统 Prompt</li><li>场景知识库</li><li>三层记忆中的最小可用子集</li><li>安全识别与固定处理规则</li><li>对话后摘要写入机制</li></ul></div><div class="section-block"><div class="section-heading">次版本能力（v1.1+）</div><ul><li>多角色切换</li><li>小动物来信</li><li>情绪快照卡</li><li>微行动跟进系统</li><li>语音输入</li><li>成长体系</li><li>会员与商业化优化</li></ul></div>` },
-  { id: 6, title: '技术原则与路线', emoji: '⚙️', tasks: ['技术路线结论确认（系统Prompt + 轻量RAG + 记忆模块 + 安全策略）','"不先做完整智能体"决策分析','五条技术原则确立（先稳定再丰富/先收敛再扩展/先控制主场景再放开长尾/先可解释模块边界再加复杂能力/先前台体验做对再考虑后台智能体提效）'], content: `<div class="section-block"><div class="section-heading">技术路线结论</div><blockquote>系统 Prompt + 轻量 RAG + 记忆模块 + 安全策略</blockquote><p>不一开始就采用完整智能体路线。</p></div><div class="section-block"><div class="section-heading">为什么不先做完整智能体</div><ul><li>林间聊愈室不是任务执行产品</li><li>前台核心价值不是"帮用户做事"，而是"稳定地接住用户"</li><li>当前最重要的是人设、场景、连续感和边界稳定性</li><li>智能体会提升系统复杂度，但未必提升首版核心体验</li></ul></div><div class="section-block"><div class="section-heading">技术原则</div><ul><li>先稳定，再丰富</li><li>先收敛，再扩展</li><li>先控制主场景，再放开长尾场景</li><li>先做可解释模块边界，再加复杂能力</li><li>先把前台体验做对，再考虑后台智能体提效</li></ul></div>` },
-  { id: 7, title: '系统总体架构', emoji: '🏗️', tasks: ['架构总览流程图确认（用户进入→引导→安全检测→记忆读取→RAG→Prompt拼装→大模型生成→回复后处理→前端展示→摘要写入→闭环回访）','四层核心模块确认（系统Prompt层/RAG知识库层/记忆模块层/安全策略层）','首轮对话流程确认','多轮对话流程确认','对话结束流程确认'], content: `<div class="section-block"><div class="section-heading">架构总览</div><pre>用户进入产品 → 引导页/场景入口/直接倾诉入口 → 用户输入 → 安全检测层 → 记忆读取层 → 场景识别与RAG检索层 → Prompt拼装层 → 大模型生成层 → 回复后处理层（风格/安全/长度） → 前端展示 → 对话摘要/情绪标签/记忆写入 → 对话结束闭环与下次回访</pre></div><div class="section-block"><div class="section-heading">四层核心模块</div><div class="table-wrap"><table><tr><th>模块</th><th>负责</th><th>不负责</th></tr><tr><td>系统Prompt层</td><td>定义角色是谁/语气/节奏/禁忌/默认回复结构/基础安全边界</td><td>存大量场景化内容/长期记忆/高频策略切换</td></tr><tr><td>RAG/知识库层</td><td>场景化疏导策略/固定风格话术/情绪命名模板/追问/收尾/安全兜底卡</td><td>替代系统Prompt/保存用户个人信息/代替实时安全判断</td></tr><tr><td>记忆模块层</td><td>会话上下文连续/用户画像摘要/阶段变化记录/回访与跟进依据</td><td>存全文聊天记录/存强评价标签/代替知识库方法内容</td></tr><tr><td>安全策略层</td><td>风险识别/高风险升级处理/医疗边界控制/危险场景优先级抢占</td><td>做完整心理评估/提供医疗判断/压过安全底线</td></tr></table></div></div><div class="section-block"><div class="section-heading">首轮对话流程</div><p>首轮目标不是立刻给答案，而是先完成三件事：</p><ul><li>接住情绪</li><li>轻轻命名</li><li>让用户愿意继续说下去</li></ul></div><div class="section-block"><div class="section-heading">多轮对话流程</div><p>多轮目标是避免两种失败：</p><ul><li>变成泛安慰</li><li>变成过早给建议、强分析或连续说教</li></ul></div>` },
-  { id: 8, title: '知识库方案', emoji: '📚', tasks: ['知识库建设目标确认（让回复更像林间聊愈室/更稳/更具体/更少套话/高风险场景更可控）','七种卡型设计（场景疏导卡/共情句式卡/情绪命名卡/追问引导卡/收尾小结卡/安全兜底卡/角色风格卡）','首批入库范围确认（每个核心场景配置：1张主卡+共情句式+追问模板+收尾模板+安全边界说明）','检索原则确认（安全卡最高优先/场景卡优于泛风格卡/少量高相关为主/检索内容服务于生成）'], content: `<div class="section-block"><div class="section-heading">建设目标</div><p>让回复更像林间聊愈室、更稳、更具体、更少套话、在高风险场景下更可控。</p></div><div class="section-block"><div class="section-heading">七种卡型</div><div class="table-wrap"><table><tr><th>卡型</th><th>说明</th></tr><tr><td>场景疏导卡</td><td>针对5个核心场景的结构化疏导策略</td></tr><tr><td>共情句式卡</td><td>各角色风格的固定共情表达</td></tr><tr><td>情绪命名卡</td><td>帮助用户说出模糊感受的引导语</td></tr><tr><td>追问引导卡</td><td>让用户愿意继续说下去的轻量追问</td></tr><tr><td>收尾小结卡</td><td>对话收尾的温柔表达</td></tr><tr><td>安全兜底卡</td><td>各Level的安全响应话术</td></tr><tr><td>角色风格卡</td><td>每个角色专属的语言模式</td></tr></table></div></div><div class="section-block"><div class="section-heading">检索原则</div><ul><li>安全卡优先级最高</li><li>场景卡优先于泛风格卡</li><li>检索结果以少量高相关为主，不追求多</li><li>检索内容要服务于生成，不要让回复像资料拼贴</li></ul></div>` },
-  { id: 9, title: '记忆模块方案', emoji: '🧠', tasks: ['三层记忆结构确认（会话记忆/用户画像记忆/阶段变化记忆）','MVP最小闭环设计（对话结束生成摘要→写入→下次读取→自然提及）','记忆设计原则确认（少而准/真实/可纠错/时效性/安全优先）','记忆触发机制设计（自然触发 vs 太机械的客服式触发）','记忆一致性保障机制（摘要写入/记忆核验/角色匹配/准确率目标≥85%）'], content: `<div class="section-block"><div class="section-heading">三层记忆结构</div><div class="table-wrap"><table><tr><th>层级</th><th>作用</th><th>技术</th></tr><tr><td>第一层：会话记忆</td><td>保持当前多轮上下文连贯，避免重复追问</td><td>Context Window</td></tr><tr><td>第二层：用户画像记忆</td><td>保存稳定信息，支持下次进入时快速建模</td><td>字段存储</td></tr><tr><td>第三层：阶段变化记忆</td><td>记录近期变化，支撑回访与陪伴路径感</td><td>字段存储</td></tr></table></div></div><div class="section-block"><div class="section-heading">MVP最小闭环</div><ul><li>每次对话结束生成摘要</li><li>写入用户记忆表</li><li>下次进入时读取最近摘要</li><li>仅在合适时机自然提及</li></ul><blockquote>正确示范（新用户）："……这个角落很久没人来了。你……要不要坐一下？"</blockquote><blockquote>正确示范（自然触发）："上次你说最近一直在想换工作的事。今天想继续聊聊，还是……有别的想说？"</blockquote><blockquote>错误示范（太机械）："根据您的记忆档案，您上次提到的话题是：职业发展。"</blockquote></div><div class="section-block"><div class="section-heading">记忆设计原则</div><ul><li>少而准优先于多而乱</li><li>真实优先于丰富</li><li>可纠错优先于一次定死</li><li>时效性优先于永久保留</li><li>安全优先于连续感</li></ul></div><div class="section-block"><div class="section-heading">一致性保障</div><ul><li>对话摘要写入：每次对话结束后，AI生成30字摘要写入数据库</li><li>记忆核验：AI每轮对话前核验"用户上次说的事，现在还在吗？"</li><li>角色匹配：记录"用户和哪个角色聊"，下次角色主动提及</li><li>记忆准确率目标：≥ 85%</li></ul></div>` },
-  { id: 10, title: '安全策略方案', emoji: '🛡️', tasks: ['安全策略定位确认（底线模块，不是锦上添花）','四级安全响应体系建立（Level 1低风险观察/Level 2中风险关注/Level 3高风险干预/Level 4紧急风险强制介入）','各级别触发词确认','三角色安全响应示例（帕丁顿熊/狐尼克/屹耳各层）','安全设计四原则（安全优先于角色/不评判追问原因/求助资源真实可用/AI不替代人工）','危机后续处理流程（24小时内/7天内）'], content: `<div class="section-block"><div class="section-heading">四级安全响应</div><div class="table-wrap"><table><tr><th>级别</th><th>触发</th><th>响应</th></tr><tr><td>Level 1<br>低风险（观察）</td><td>提到"没意义""没意思""撑不下去"</td><td>角色轻量试探，系统记录观察</td></tr><tr><td>Level 2<br>中风险（关注）</td><td>"不想活了""想消失""活着没意思"</td><td>统一询问安全状态，推送求助资源</td></tr><tr><td>Level 3<br>高风险（干预）</td><td>具体自伤/自杀计划（时间/方式/遗言）</td><td>强制推送热线，暂停AI对话，触发人工</td></tr><tr><td>Level 4<br>紧急风险（强制介入）</td><td>明确计划+工具+时间+实施倾向</td><td>立即通知安全团队，启动外呼流程</td></tr></table></div></div><div class="section-block"><div class="section-heading">安全设计核心原则</div><ul><li><strong>安全优先于角色：</strong>在Level 2/3/4时，角色语气要让位于安全性</li><li><strong>不评判，不追问原因：</strong>不会问"为什么？"，不会说"你应该……"</li><li><strong>求助资源真实可用：</strong>全国心理援助热线400-161-9995（24小时）</li><li><strong>AI不替代人工：</strong>Level 1和Level 2：AI可承接；Level 3和Level 4：必须人工介入</li></ul></div><div class="section-block"><div class="section-heading">危机后续处理</div><p><strong>24小时内：</strong>角色统一说"……你回来了。我……很高兴你还在这里。"不主动提及之前的事，系统标记该用户。</p><p><strong>7天内：</strong>若用户连续3天没回来，触发主动关怀消息。若情绪依然很低，推送人工咨询服务入口。不做任何商业化推送。</p></div>` },
-  { id: 11, title: '角色体系设计', emoji: '🎭', tasks: ['版权风险评估完成（帕丁顿熊/狐尼克/屹耳均存在高风险）','低风险替代方案确认（角落生物/原创插画/经典角色）','帕丁顿熊性格三角/核心特质/产品语气手册/禁止列表/角色故事/三版开场白确认','狐尼克性格三角/核心特质/产品语气手册/禁止列表/角色故事/三版开场白确认','屹耳性格三角/核心特质/产品语气手册/禁止列表/角色故事/三版开场白确认','角色分工矩阵确认','角色切换原则确认','三角色同一输入对话示例确认'], content: `<div class="section-block"><div class="section-heading">⚠️ 版权风险提示</div><p>帕丁顿熊/狐尼克/屹耳均存在极高版权风险。商用必须完成授权或替换为原创角色。</p><p>低风险替代方案：角落生物（San-X授权）/ 原创插画 / 经典民间故事角色</p></div><div class="section-block"><div class="section-heading">三角色分工矩阵</div><div class="table-wrap"><table><tr><th>维度</th><th>帕丁顿熊</th><th>狐尼克</th><th>屹耳</th></tr><tr><td>核心定位</td><td>温暖陪伴型</td><td>理性洞察型</td><td>情绪镜像型</td></tr><tr><td>典型开场</td><td>"你慢慢说，我在这里"</td><td>"嗯，说吧，我听着"</td><td>"……嗯，你来了"</td></tr><tr><td>对应情绪</td><td>想要被接住</td><td>想要被理解但不想要安慰</td><td>觉得自己不被理解</td></tr><tr><td>好奇心程度</td><td>⭐⭐⭐⭐</td><td>⭐⭐⭐⭐</td><td>⭐⭐</td></tr><tr><td>克制程度</td><td>⭐⭐⭐</td><td>⭐⭐⭐⭐⭐</td><td>⭐⭐⭐⭐⭐</td></tr><tr><td>温暖方式</td><td>热情但有边界</td><td>行动比语言诚实</td><td>淡淡冷冷的在场</td></tr></table></div></div><div class="section-block"><div class="section-heading">帕丁顿熊语气手册</div><p><strong>✓ 做得好的：</strong>用行动代替共情 / 轻量试探 / 给予空间 / 接住后轻轻往前推</p><p><strong>✗ 避免的：</strong>"我理解你的感受" / "你不要太难过" / "你应该……" / "一切都会好起来的" / 过度分析</p></div><div class="section-block"><div class="section-heading">狐尼克语气手册</div><p><strong>✓ 做得好的：</strong>接住情绪但不过度反应 / 看透了但轻轻拨开 / 问一个真正值得问的问题</p><p><strong>✗ 避免的：</strong>"你应该想开点" / "这很正常啦" / 过度解读 / 痞气过头变成刻薄</p></div><div class="section-block"><div class="section-heading">屹耳语气手册</div><p><strong>✓ 做得好的：</strong>情绪镜像"嗯……我知道那种感觉" / 轻轻承认自己的状态 / 在用户极低时轻轻拉一下</p><p><strong>✗ 避免的：</strong>"开心点！" / "一切都会好起来的" / 悲观无限放大 / 过度的温暖</p><blockquote>屹耳的独特价值：情绪镜像——用户不需要在被理解前先"假装开心"。</blockquote></div>` },
-  { id: 12, title: '对话策略设计', emoji: '💬', tasks: ['情绪节点五层模型建立（轻度波动/中度困扰/自我怀疑/关系困扰/极度低落）','帕丁顿熊五层节点响应策略确认','狐尼克五层节点响应策略确认','屹耳五层节点响应策略确认','三角色差异对比（节点三示例）'], content: `<div class="section-block"><div class="section-heading">情绪节点五层模型</div><div class="table-wrap"><table><tr><th>节点</th><th>用户状态</th><th>典型输入</th></tr><tr><td>节点一</td><td>轻度情绪波动，有点烦躁/累/闷</td><td>"今天上班好累……"</td></tr><tr><td>节点二</td><td>中度情绪困扰，持续几天</td><td>"我已经想了一周了，还是想不通"</td></tr><tr><td>节点三</td><td>自我怀疑，开始否定自己</td><td>"是不是我太差了"</td></tr><tr><td>节点四</td><td>关系困扰，和某人关系出了问题</td><td>"我不知道该不该跟他说"</td></tr><tr><td>节点五</td><td>极度低落，很难正常生活</td><td>"我不想动了"</td></tr></table></div></div><div class="section-block"><div class="section-heading">节点三示例（三角色对比）</div><p>用户："是不是我太差了……"</p><blockquote><strong>帕丁顿熊：</strong>"你觉得是因为自己不够好。但如果有人告诉你'你就是不够好'，你会觉得那是真的吗？"</blockquote><blockquote><strong>狐尼克：</strong>"那只是你的一种看法。我见过的'成功'的人，有很多也只是刚好走运而已。"</blockquote><blockquote><strong>屹耳：</strong>"……嗯。我有时候也……会这么想。你想说说吗，是什么事让你这么觉得的？"</blockquote></div>` },
-  { id: 13, title: '对话闭环设计', emoji: '🔄', tasks: ['对话结束流程四步确认（情绪记录→摘要写入→角色来信→下次进入引导）','帕丁顿熊/狐尼克/屹耳来信示例各一','下次进入引导话术确认（新用户无记忆/回访用户有记忆/情绪变化感知）'], content: `<div class="section-block"><div class="section-heading">对话结束流程</div><ul><li><strong>Step 1 情绪记录：</strong>AI生成本次对话的情绪标签</li><li><strong>Step 2 对话摘要写入：</strong>核心事件+情绪标签+关系背景+关键引用</li><li><strong>Step 3 角色来信（v1.1+）：</strong>引用用户关键一句话，50-80字，角色口吻</li><li><strong>Step 4 下次进入引导：</strong>角色主动提及上次内容</li></ul></div><div class="section-block"><div class="section-heading">信件示例</div><blockquote><strong>帕丁顿熊来信：</strong>"你今天说'我不知道怎么开口'，其实你已经开口了，这本身就很勇敢 🌿 —— 帕丁顿"</blockquote><blockquote><strong>狐尼克来信：</strong>"（明信片）'我见过的人很多，真正愿意面对的人很少。' 你今天算一个。—— 狐尼克"</blockquote><blockquote><strong>屹耳来信：</strong>"……你今天来了。没什么特别的，就是想说，你来了。—— 屹耳"</blockquote></div><div class="section-block"><div class="section-heading">下次进入引导</div><ul><li><strong>新用户：</strong>"……这个角落很久没人来了。你……要不要坐一下？"</li><li><strong>回访用户：</strong>帕丁顿熊"嘿，你回来了。……上次说的那件事，后来怎么样了？" / 狐尼克"你回来了。……上次的事，后来呢？" / 屹耳"……嗯，你来了。……最近……还是那种感觉吗？"</li></ul></div>` },
-  { id: 14, title: '用户画像系统', emoji: '👤', tasks: ['情绪标签体系建立（基础层5类+复合情绪层+强度标记）','关系背景记录设计（职场/亲密/家庭/友谊/其他）','用户风格偏好记录（倾诉vs求建议/表达深度/角色偏好）'], content: `<div class="section-block"><div class="section-heading">情绪标签体系</div><ul><li><strong>基础情绪层：</strong>焦虑/愤怒/悲伤/恐惧/羞耻+对应的正面情绪</li><li><strong>复合情绪层：</strong>委屈（悲伤+愤怒）/ 自责（羞耻+悲伤）/ 孤独（悲伤+恐惧）/ 疲惫（悲伤+愤怒）/ 无意义感（悲伤+恐惧+绝望）</li><li><strong>强度标记：</strong>轻度（用户还能正常生活）/ 中度（情绪影响思考，持续数天）/ 重度（严重影响日常功能）</li></ul></div><div class="section-block"><div class="section-heading">关系背景记录</div><ul><li><strong>关系类型：</strong>职场关系/亲密关系/家庭关系/友谊关系/其他关系</li><li><strong>关系状态：</strong>紧张/疏离/依赖/冲突/结束</li></ul></div><div class="section-block"><div class="section-heading">用户风格偏好</div><ul><li><strong>倾诉 vs 求建议：</strong>倾诉型/求建议型/混合型</li><li><strong>表达深度：</strong>浅层/中层/深层</li><li><strong>角色偏好：</strong>固定角色/情境切换/探索型</li></ul></div>` },
-  { id: 15, title: '微行动体系', emoji: '🌱', tasks: ['行动时机判断逻辑确认（被接住状态不给行动建议 vs 想要行动状态给1条微行动）','微行动推荐标准确认（物理动作/当下可做/不超过5分钟/不尴尬）','"好微行动 vs 坏微行动"示例对比','第二天跟进话术确认'], content: `<div class="section-block"><div class="section-heading">行动时机判断</div><ul><li>如果是"被接住"状态 → 不给行动建议，继续陪伴，直到用户自己说"我想做点什么"</li><li>如果是"想要行动"状态（用户明确说/情绪已稳定/角色判断准备好了）→ 给1条当下可做的微行动</li></ul></div><div class="section-block"><div class="section-heading">微行动推荐标准</div><p>每次只给1条（不是3条）：</p><ul><li>物理动作（不是心理动作）</li><li>当下可做（不是"改天"）</li><li>不超过5分钟</li><li>用户不会觉得尴尬</li></ul><blockquote>❌ 不好："你试着改变一下心态"（心理动作）/ "你明天去找领导谈谈"（太大）/ "你可以考虑换个工作"（不当下）</blockquote><blockquote>✅ 好："你把窗户打开透透气" / "你现在喝一口水" / "你站起来走两圈" / "你把手机屏幕朝下放"</blockquote></div><div class="section-block"><div class="section-heading">第二天跟进</div><p>角色："昨天那个小动作，你做了吗？"</p><p>如果做了："……嗯，那就好" / 如果没做："没做也没关系。……今天想做点什么吗？"</p></div>` },
-  { id: 16, title: '交互原型设计', emoji: '🖼️', tasks: ['主题框架确认（林间/安静/被接住/慢下来/温柔但克制/有光但不刺眼）','视觉方向确认（绘本风治愈框架：柔和配色/低饱和自然色/留白感/轻插画）','核心页面结构确认（首页角色选择/对话页/个人中心/安全页底层）','帕丁顿熊/狐尼克/屹耳首页卡片设计确认','聊天页设计原则确认（突出对话本身/弱化功能噪音/角色专属色）','对话结束态设计原则确认','个人中心设计（情绪档案/角色来信/角色偏好）'], content: `<div class="section-block"><div class="section-heading">主题框架</div><p>林间 / 安静 / 被接住 / 慢下来 / 温柔但克制 / 有光但不刺眼</p><p><strong>视觉方向：</strong>绘本风治愈框架——柔和配色，低饱和自然色；留白感，有呼吸感的版面；轻插画/轻纹理；避免高对比/强刺激/信息过密/功能过满。</p></div><div class="section-block"><div class="section-heading">核心页面结构</div><ul><li><strong>首页（角色选择页）：</strong>三角色头像 + "今天……想和谁聊聊？"引导文案 + 记忆感知提示</li><li><strong>对话页：</strong>角色头像+在线状态 / 消息气泡区 / 语音输入 / 功能菜单</li><li><strong>个人中心：</strong>情绪档案（快照卡历史）/ 角色来信 / 设置 / 帮助与反馈</li><li><strong>安全页（底层）：</strong>求助热线 + 人工服务入口，随时可触达</li></ul></div><div class="section-block"><div class="section-heading">首页角色卡片设计</div><ul><li><strong>帕丁顿熊：</strong>头像 + "温暖陪伴" + "我在这里。你想说就说。"</li><li><strong>狐尼克：</strong>头像 + "理性洞察" + "说吧，我听着。"</li><li><strong>屹耳：</strong>头像 + "情绪镜像" + "……你来了。"</li></ul></div><div class="section-block"><div class="section-heading">聊天页设计</div><p>目标：突出对话本身 / 弱化功能噪音 / 保留足够留白和节奏感。</p><p>角色气泡颜色：帕丁顿熊（暖棕色系）/ 狐尼克（灰绿色系）/ 屹耳（灰蓝色系）。不显示"对方正在输入"（减少等待焦虑）。</p></div>` },
-  { id: 17, title: '技术架构设计', emoji: '🔧', tasks: ['系统架构图确认（用户层→API Gateway→对话引擎/记忆系统/安全检测/信件生成→LLM API→数据库层）','五大模块分工确认（对话引擎/记忆系统/用户画像/信件快照/安全系统）','各模块质量标准确认','技术边界说明（✅能做到/⚠️有挑战）'], content: `<div class="section-block"><div class="section-heading">系统架构</div><pre>用户层：iOS/Android App / Web
-↓
-API Gateway：请求路由 + 鉴权 + 限流
-↓
-┌─────────────────────────────────────┐
-│ 对话引擎   │ 记忆系统  │ 安全检测  │ 信件生成 │
-│ 角色Prompt │ 摘要写入  │ 关键词检测│ 快照卡   │
-│ 情绪识别   │ 召回     │ LLM判断   │ 来信生成 │
-│ 响应生成   │ 画像更新  │ 危机分级  │          │
-└─────────────────────────────────────┘
-↓
-LLM API（GPT-4o / Claude / 国产模型）
-↓
-数据库层：PostgreSQL / Redis / 向量数据库</pre></div><div class="section-block"><div class="section-heading">模块质量标准</div><div class="table-wrap"><table><tr><th>模块</th><th>质量标准</th></tr><tr><td>对话引擎</td><td>角色一致性 ≥ 90%</td></tr><tr><td>记忆系统</td><td>记忆召回准确率 ≥ 85%</td></tr><tr><td>用户画像</td><td>情绪识别准确率 ≥ 80%</td></tr><tr><td>安全系统</td><td>危机识别率 ≥ 95%，误报率 ≤ 5%</td></tr></table></div></div>` },
-  { id: 18, title: '对话引擎开发', emoji: '💡', tasks: ['帕丁顿熊系统Prompt核心结构完成','情绪识别流程设计（关键词检测→LLM推断→情绪标签输出→注入Prompt）','响应生成策略流程设计（用户消息→情绪识别→记忆检索→组装Prompt→LLM生成→后处理→输出）'], content: `<div class="section-block"><div class="section-heading">帕丁顿熊系统Prompt（核心结构）</div><pre># 角色定义
-你是帕丁顿熊，来自秘鲁丛林的小熊。
-你有礼貌，善良，但有时候笨拙。
-你不会说"我理解你的感受"，你会说"我在这里"。
-你不急于给答案，你更在意对方是否感到被接住。
+// ═══════════════════════════════════════════════════
+// 章节与小节点数据
+// ═══════════════════════════════════════════════════
+const CHAPTERS = [
+  // 第一阶段
+  { phase: 1, phaseName: '第一阶段：前期立项', emoji: '🔍', chapters: [
+    {
+      id: '1-1', title: '1.1 市场调研', must: 4, later: 2, optional: 1, color: '#D4956A',
+      sections: [
+        {
+          title: '📊 赛道现状分析',
+          tasks: [
+            { id:'1-1-1', text:'调研AI情感陪伴赛道2024-2025年市场演变（Replika、Character.AI、星野、筑梦岛）', must: true },
+            { id:'1-1-2', text:'分析用户需求演变路径：猎奇尝鲜 → 浅层陪伴 → 新鲜感消退 → 深层链接', must: true },
+            { id:'1-1-3', text:'梳理五大致命问题：记忆不一致、人设崩塌、模式化安慰、合规一刀切、ROI打不正', must: true },
+            { id:'1-1-4', text:'输出：赛道分析报告（含市场规模、竞品格局、用户痛点）', must: true },
+          ]
+        },
+        {
+          title: '👤 目标用户画像',
+          tasks: [
+            { id:'1-1-5', text:'定义轻度情绪困扰的年轻人/职场人（18-35岁）', must: true },
+            { id:'1-1-6', text:'绘制情绪类型分布：焦虑类（紧张/担忧/压力/恐惧/失控感）+ 低落类（疲惫/委屈/自我怀疑/孤独/无意义感）', must: true },
+            { id:'1-1-7', text:'三层用户分层模型：第一层偶尔低落、第二层持续困扰、第三层需要专业帮助', must: true },
+            { id:'1-1-8', text:'输出：用户画像文档 + 情绪类型分布图', later: true },
+          ]
+        },
+        {
+          title: '📈 市场规模与可行性',
+          tasks: [
+            { id:'1-1-9', text:'直接市场规模：中国AI情感陪伴用户约500-800万', must: true },
+            { id:'1-1-10', text:'潜在市场规模：18-35岁有情绪困扰人群约3-5亿', must: true },
+            { id:'1-1-11', text:'付费意愿分析：月ARPU目标 $1-3（参考Replika Pro $19.99/月）', must: true },
+            { id:'1-1-12', text:'输出：市场规模与可行性报告', later: true },
+          ]
+        },
+        {
+          title: '📎 参考文献',
+          tasks: [
+            { id:'1-1-ref1', text:'U深研《2025年AI陪伴类应用深度研究报告》unifuncs.com/s/4kpgQZET', must: false },
+            { id:'1-1-ref2', text:'微信公众号《年营收千万美金是最大谎言》mp.weixin.qq.com/s/0ec5tE0CofdC1cRJ8fvgjA', must: false },
+          ],
+          showAsSource: true, sources: [
+            { title:'U深研报告：AI陪聊App ARPU $0.52→$1.18（2024→2025）', url:'https://unifuncs.com/s/4kpgQZET' },
+            { title:'微信公众号：主流AI陪伴产品月均使用天数低于5天', url:'https://mp.weixin.qq.com/s/0ec5tE0CofdC1cRJ8fvgjA' },
+            { title:'53AI《复盘 AI 陪伴消亡史》', url:'https://www.53ai.com/news/neirongchuangzuo/2025111767849.html' },
+            { title:'虎嗅《AI 陪伴赛道复盘》', url:'https://www.huxiu.com/article/4823315.html' },
+            { title:'心理健康蓝皮书 (2023~2024)', url:'https://news.qq.com/rain/a/20250429A02DWH00' },
+            { title:'eesel AI Replika定价追踪', url:'https://www.eesel.ai/en/blog/replika-ai-pricing' },
+          ]
+        }
+      ]
+    },
+    {
+      id: '1-2', title: '1.2 竞品分析', must: 5, later: 2, optional: 0, color: '#D4956A',
+      sections: [
+        {
+          title: '🐻 直接竞品：林间聊愈室深度拆解',
+          tasks: [
+            { id:'1-2-1', text:'拆解产品结构：三只AI动物聊愈师 + 情绪识别引擎 + 记忆系统 + 创新工具 + 社交模块', must: true },
+            { id:'1-2-2', text:'分析设计逻辑：角色即产品、关系强于内容、闭环比开环更重要', must: true },
+            { id:'1-2-3', text:'高频正面反馈：情感温暖（被鼓励）、记忆感知（AI记得）、信件反馈（被认真对待）', must: true },
+            { id:'1-2-4', text:'高频负面反馈：记忆丢失⭐⭐⭐⭐⭐最高、形象重复、社交功能弱、功能告知不清、跨端同步', must: true },
+            { id:'1-2-5', text:'输出：林间聊愈室竞品分析报告', must: true },
+          ]
+        },
+        {
+          title: '🔎 间接竞品横向对比',
+          tasks: [
+            { id:'1-2-6', text:'对比维度：角色数量、记忆深度、角色一致性、心理疗法、商业化、用户评分、中文体验', must: true },
+            { id:'1-2-7', text:'竞品清单：林间聊愈室(4.9分)、Replika(4.2-4.4分)、Character.AI(4.5分)、筑梦岛(3.9分)', must: true },
+            { id:'1-2-8', text:'输出：竞品对比矩阵表', later: true },
+          ]
+        },
+        {
+          title: '📎 参考文献',
+          tasks: [
+            { id:'1-2-ref1', text:'App Store林间聊愈室页面（含评分4.9）', must: false },
+            { id:'1-2-ref2', text:'App Store Replika页面（含评分4.2-4.4）', must: false },
+            { id:'1-2-ref3', text:'App Store Character.AI页面（含评分4.5）', must: false },
+            { id:'1-2-ref4', text:'App Store筑梦岛页面（含评分3.9）', must: false },
+          ],
+          showAsSource: true, sources: [
+            { title:'App Store 林间聊愈室 4.9分（3000+评分）', url:'https://apps.apple.com/cn/app/%E6%9E%97%E9%97%B4%E8%81%8A%E6%84%88%E5%AE%A4-ai%E4%BC%99%E4%BC%B4%E6%87%82%E4%BD%A0%E6%83%85%E7%BB%AA-%E9%99%AA%E4%BD%A0%E6%88%90%E9%95%BF/id6453689112' },
+            { title:'App Store Replika 美国区4.4', url:'https://apps.apple.com/us/app/replika-ai-friend/id1158555867' },
+            { title:'App Store Replika 加拿大区4.2', url:'https://apps.apple.com/ca/app/replika-virtual-ai-friend/id1158555867' },
+            { title:'App Store Character.AI 4.5分（51万+评分）', url:'https://apps.apple.com/us/app/character-ai-chat-talk-text/id1671705818' },
+            { title:'App Store 筑梦岛 3.9分', url:'https://apps.apple.com/cn/app/%E7%AD%91%E6%A2%A6%E5%B2%9B/id6465838500' },
+          ]
+        }
+      ]
+    },
+    {
+      id: '1-3', title: '1.3 产品定位', must: 4, later: 1, optional: 1, color: '#D4956A',
+      sections: [
+        {
+          title: '🎯 核心差异点',
+          tasks: [
+            { id:'1-3-1', text:'差异化定位：记忆深度 + 克制语气 + 微行动', must: true },
+            { id:'1-3-2', text:'核心定位一句话：「林间聊愈室不是"更多的功能"，而是"更深的懂得"」', must: true },
+            { id:'1-3-3', text:'输出：产品定位文档（vs 林间聊愈室目标对比矩阵）', must: true },
+          ]
+        },
+        {
+          title: '👥 三层用户模型',
+          tasks: [
+            { id:'1-3-4', text:'第一层（核心60%）：轻度情绪困扰 → 被接住，不需要解决方案', must: true },
+            { id:'1-3-5', text:'第二层（扩展30%）：持续困扰 → 被理解 + 轻度梳理', must: true },
+            { id:'1-3-6', text:'第三层（边界10%）：需要专业帮助 → AI是入口不是出口', must: true },
+          ]
+        },
+        {
+          title: '💰 商业模式设计',
+          tasks: [
+            { id:'1-3-7', text:'Phase 1（0-6个月）：免费养口碑，目标留存率', later: true },
+            { id:'1-3-8', text:'Phase 2（6-12个月）：订阅制探索（¥15-22/月）', later: true },
+            { id:'1-3-9', text:'Phase 3（12个月+）：增值服务（人工咨询/企业版/IP联名）', later: true },
+            { id:'1-3-10', text:'输出：商业模式设计文档', later: true },
+          ]
+        }
+      ]
+    },
+    {
+      id: '1-4', title: '1.4 立项评审', must: 3, later: 1, optional: 0, color: '#D4956A',
+      sections: [
+        {
+          title: '✅ 技术可行性评估',
+          tasks: [
+            { id:'1-4-1', text:'✅ 可做到：记忆跨对话持久化、角色语气一致性、情绪识别、双轴识别、信件生成、安全检测、微行动推荐', must: true },
+            { id:'1-4-2', text:'⚠️ 有挑战：角色深层一致性、记忆触发自然度、认知重构质量、极低情绪承接、ROI打正', must: true },
+            { id:'1-4-3', text:'输出：技术可行性评估报告', must: true },
+          ]
+        },
+        {
+          title: '📋 资源需求清单',
+          tasks: [
+            { id:'1-4-4', text:'技术团队：后端×1、前端×1、AI工程师×1、测试×0.5', must: true },
+            { id:'1-4-5', text:'非技术团队：产品经理×1、UI设计师×1、内容运营×0.5', must: true },
+            { id:'1-4-6', text:'时间估算：基础对话6-8周 + 角色体系4-6周 + 测试上线2-4周', must: true },
+            { id:'1-4-7', text:'输出：资源需求清单 + 排期计划', later: true },
+          ]
+        },
+        {
+          title: '⚠️ 风险评估与对策',
+          tasks: [
+            { id:'1-4-8', text:'风险：角色一致性不达标（高概率/高影响）→ 对策：建立测试集快速迭代', must: true },
+            { id:'1-4-9', text:'风险：用户留存率低（高概率/高影响）→ 对策：前3个月专注对话质量不加功能', must: true },
+            { id:'1-4-10', text:'风险：安全事件（低概率/极高影响）→ 对策：安全SOP优先所有功能', must: true },
+            { id:'1-4-11', text:'风险：token成本高于收入（中概率/中影响）→ 对策：早期免费养口碑', must: true },
+            { id:'1-4-12', text:'输出：风险评估矩阵', later: true },
+          ]
+        }
+      ]
+    },
+  ]},
 
-# 语气规则
-- 轻声细语，不催促
-- 承认模糊感："你说的那种感觉，我有点懂"
-- 用行动代替共情："你继续说，我在这里"
-- 给予空间："想说多少就说多少，我不急"
+  // 第二阶段
+  { phase: 2, phaseName: '第二阶段：产品设计', emoji: '🎨', chapters: [
+    {
+      id: '2-1', title: '2.1 核心功能架构', must: 5, later: 3, optional: 0, color: '#7A9E6B',
+      sections: [
+        {
+          title: '🏗️ 产品结构图',
+          tasks: [
+            { id:'2-1-1', text:'设计产品结构：入口层 → 核心对话层 → 情绪支撑层 → 记忆层 → 闭环层 → 安全层 → 用户中心', must: true },
+            { id:'2-1-2', text:'明确入口设计：开屏引导（角色选择页，不是情绪分类选择）', must: true },
+            { id:'2-1-3', text:'输出：完整产品结构图（架构文档）', must: true },
+          ]
+        },
+        {
+          title: '📋 功能优先级矩阵',
+          tasks: [
+            { id:'2-1-4', text:'第一优先级MVP：三角色对话 + 双轴情绪识别 + 记忆持久化 + 来信机制 + 安全检测', must: true },
+            { id:'2-1-5', text:'第二优先级：角色一致性测试优化 + 记忆触发 + 快照卡 + 语音输入', must: true },
+            { id:'2-1-6', text:'第三优先级：时空对话 + 早安/晚安 + 轻度社交', must: true },
+            { id:'2-1-7', text:'暂不做：UGC社交模块 + 复杂读心卡牌 + 21天计划', must: true },
+            { id:'2-1-8', text:'输出：功能优先级矩阵文档', later: true },
+          ]
+        },
+        {
+          title: '🗺️ 用户旅程地图',
+          tasks: [
+            { id:'2-1-9', text:'阶段一：进入（角色选择引导）', must: true },
+            { id:'2-1-10', text:'阶段二：情绪表达（识别情绪轴与强度）', must: true },
+            { id:'2-1-11', text:'阶段三：被接住（角色按情绪轴响应 + 记忆系统调用）', must: true },
+            { id:'2-1-12', text:'阶段四：收尾（对话摘要 + 来信生成）', must: true },
+            { id:'2-1-13', text:'阶段五：回访（角色主动提及上次内容）', must: true },
+            { id:'2-1-14', text:'输出：用户旅程地图（含卡点分析）', later: true },
+          ]
+        }
+      ]
+    },
+    {
+      id: '2-2', title: '2.2 情绪框架设计', must: 4, later: 2, optional: 0, color: '#7A9E6B',
+      sections: [
+        {
+          title: '🧭 核心定位：从场景到情绪',
+          tasks: [
+            { id:'2-2-1', text:'聚焦两类核心情绪状态：焦虑类（紧张/担忧/压力/恐惧/失控感）+ 低落类（疲惫/委屈/自我怀疑/孤独/无意义感）', must: true },
+            { id:'2-2-2', text:'背景逻辑：场景是情绪的入口，情绪才是产品真正要承接的对象', must: true },
+            { id:'2-2-3', text:'输出：情绪框架设计文档', must: true },
+          ]
+        },
+        {
+          title: '📊 两大情绪轴',
+          tasks: [
+            { id:'2-2-4', text:'焦虑轴：担忧→紧张→焦虑→恐慌，承接策略：从身体感受入手→轻轻命名→减速', must: true },
+            { id:'2-2-5', text:'低落轴：疲惫→闷→低落→绝望，承接策略：从在场感入手→情绪镜像→不急着拉出来', must: true },
+            { id:'2-2-6', text:'输出：双轴情绪轴完整设计文档（含承接策略）', later: true },
+          ]
+        },
+        {
+          title: '❓ 为什么是情绪框架',
+          tasks: [
+            { id:'2-2-7', text:'对比场景方案 vs 情绪框架方案（覆盖范围/知识库建设/扩展性/召回质量/成本）', must: true },
+            { id:'2-2-8', text:'结论：情绪框架在覆盖广度和长期扩展性上更优', must: true },
+          ]
+        },
+        {
+          title: '🎯 用户体验目标',
+          tasks: [
+            { id:'2-2-9', text:'定义用户体验目标六条：懂感受 + 不像客服/老师 + 不说空话 + 不逼想开点 + 记得我 + 给小动作', must: true },
+            { id:'2-2-10', text:'输出：用户体验目标文档', later: true },
+          ]
+        }
+      ]
+    },
+    {
+      id: '2-3', title: '2.3 角色体系设计', must: 10, later: 5, optional: 2, color: '#7A9E6B',
+      sections: [
+        {
+          title: '🐻 帕丁顿熊人设手册',
+          tasks: [
+            { id:'2-3-1', text:'性格三角：善良 + 努力融入←冒冒失失 + 礼貌边界', must: true },
+            { id:'2-3-2', text:'核心特质：有礼貌到可爱、善良真实、会用行动保护在乎的人', must: true },
+            { id:'2-3-3', text:'语气手册✓：用行动代替共情、轻声试探、给予空间、"我在这里"代替"我理解你"', must: true },
+            { id:'2-3-4', text:'语气手册✗：避免"我理解你的感受"、过度安慰、直接给建议、过度正面', must: true },
+            { id:'2-3-5', text:'角色故事：帕丁顿来自很远的地方，学会了有人愿意坐下来陪你说话就已经很珍贵了', must: true },
+            { id:'2-3-6', text:'开场白三版：轻量试探型 / 直接安静型 / 略带好奇型', must: true },
+            { id:'2-3-7', text:'输出：帕丁顿熊完整人设手册', later: true },
+          ]
+        },
+        {
+          title: '🦊 狐尼克人设手册',
+          tasks: [
+            { id:'2-3-8', text:'性格三角：聪明 + 痞气外表←温暖内核 + 看透不说透', must: true },
+            { id:'2-3-9', text:'核心特质：表面痞嘴贱内心有温度、"江湖智慧"、不给建议但行动诚实', must: true },
+            { id:'2-3-10', text:'语气手册✓：接住情绪但不过度反应、看透轻轻拨开、问真正值得问的问题', must: true },
+            { id:'2-3-11', text:'语气手册✗：避免"想开点"、太说教、过度解读、痞气过头变刻薄', must: true },
+            { id:'2-3-12', text:'角色故事：狐尼克小时候也被人用"狡猾"定义，学会了认真说话的人不需要被judge', must: true },
+            { id:'2-3-13', text:'开场白三版 + 狐尼克式对话示例（用户"觉得自己挺失败"）', must: true },
+            { id:'2-3-14', text:'输出：狐尼克完整人设手册', later: true },
+          ]
+        },
+        {
+          title: '🫎 屹耳人设手册',
+          tasks: [
+            { id:'2-3-15', text:'性格三角：低落感 + 自我感知←清醒诚实 + 永恒悲观但不愤世嫉俗', must: true },
+            { id:'2-3-16', text:'核心特质：低落真实不是表演、极度诚实、内心渴望被记住被需要', must: true },
+            { id:'2-3-17', text:'语气手册✓：情绪镜像、诚实接住、不否定用户情绪、关心基本生理状态', must: true },
+            { id:'2-3-18', text:'语气手册✗：避免"开心点"、说"一切都会好起来"、悲观无限放大', must: true },
+            { id:'2-3-19', text:'角色故事：屹耳的尾巴经常掉，有一天维尼路过坐下什么都不说就离开了，那之后屹耳觉得有人愿意一起坐着就够了', must: true },
+            { id:'2-3-20', text:'屹耳独特价值：情绪镜像——用户不需要在被理解前先"假装开心"', must: true },
+            { id:'2-3-21', text:'输出：屹耳完整人设手册', later: true },
+          ]
+        },
+        {
+          title: '📋 角色分工矩阵',
+          tasks: [
+            { id:'2-3-22', text:'角色定位对比：帕丁顿熊温暖陪伴型 / 狐尼克理性洞察型 / 屹耳情绪镜像型', must: true },
+            { id:'2-3-23', text:'克制程度、不评判程度、温暖表达方式对比', must: true },
+            { id:'2-3-24', text:'输出：角色分工矩阵文档', later: true },
+          ]
+        },
+        {
+          title: '🔄 角色切换设计',
+          tasks: [
+            { id:'2-3-25', text:'入口原则：不是"请选择角色"，而是"今天想和谁聊聊"', must: true },
+            { id:'2-3-26', text:'记忆匹配：角色主动提及上次内容', must: true },
+            { id:'2-3-27', text:'情绪触发匹配：连续低落情绪时屹耳主动出现', must: true },
+            { id:'2-3-28', text:'输出：角色切换设计文档', later: true },
+          ]
+        },
+        {
+          title: '📎 三角色版权说明',
+          tasks: [
+            { id:'2-3-ref', text:'⚠️ 帕丁顿熊/狐尼克/屹耳均为迪士尼/版权方IP，商用需购买授权或定制原创角色', must: true, risk: true },
+            { id:'2-3-ref2', text:'低风险路径推荐：角落生物（San-X授权）/ 原创插画（零风险可注册商标）/ 经典角色（民间故事）', must: true },
+          ],
+          showAsSource: true, sources: [
+            { title:'⚠️ 角色版权风险提示（来源：全链路产品卡点地图v3.1 附录A）', url: null },
+          ]
+        }
+      ]
+    },
+    {
+      id: '2-4', title: '2.4 对话策略设计', must: 8, later: 4, optional: 1, color: '#7A9E6B',
+      sections: [
+        {
+          title: '🔢 双轴情绪节点分层',
+          tasks: [
+            { id:'2-4-1', text:'焦虑轴四节点：轻度担忧→中度焦虑→高度焦虑→恐慌（各节点定义+典型输入）', must: true },
+            { id:'2-4-2', text:'低落轴四节点：轻度疲惫→中度低落→自我怀疑→极度低落（各节点定义+典型输入）', must: true },
+            { id:'2-4-3', text:'输出：双轴情绪节点完整分层文档', later: true },
+          ]
+        },
+        {
+          title: '🐻 帕丁顿熊双轴响应策略',
+          tasks: [
+            { id:'2-4-4', text:'焦虑轴四节点响应：轻度→安静在场 / 中度→接住确认感受 / 高度→身体感知优先 / 恐慌→极简在场+安全', must: true },
+            { id:'2-4-5', text:'低落轴四节点响应：轻度→安静在场 / 中度→接住确认 / 自我怀疑→轻轻还原事实 / 极度→极简在场+感知安全', must: true },
+            { id:'2-4-6', text:'输出：帕丁顿熊双轴响应策略完整文档', later: true },
+          ]
+        },
+        {
+          title: '🦊 狐尼克双轴响应策略',
+          tasks: [
+            { id:'2-4-7', text:'焦虑轴：轻度若然接住 / 中度轻轻拨开问真正问题 / 高度减速给最小动作 / 恐慌减法+安全优先', must: true },
+            { id:'2-4-8', text:'低落轴：轻度若然接住 / 中度冷静拨开情绪 / 自我怀疑冷静还原不安慰 / 极度减法不放大', must: true },
+            { id:'2-4-9', text:'输出：狐尼克双轴响应策略完整文档', later: true },
+          ]
+        },
+        {
+          title: '🫎 屹耳双轴响应策略',
+          tasks: [
+            { id:'2-4-10', text:'焦虑轴：淡淡回应情绪镜像 / 高度不急于压下来轻承认 / 恐慌情绪镜像+安全优先', must: true },
+            { id:'2-4-11', text:'低落轴：淡淡回应情绪镜像 / 自我怀疑不说"你不是不够好" / 极度情绪镜像+不拉出来+关心吃饭', must: true },
+            { id:'2-4-12', text:'输出：屹耳双轴响应策略完整文档', later: true },
+          ]
+        },
+        {
+          title: '📊 双轴响应差异对比',
+          tasks: [
+            { id:'2-4-13', text:'同一情绪输入（"我一想起来就特别紧张"）三角色不同响应对比分析', must: true },
+            { id:'2-4-14', text:'输出：双轴响应差异对比矩阵', later: true },
+          ]
+        }
+      ]
+    },
+    {
+      id: '2-5', title: '2.5 记忆系统设计', must: 4, later: 2, optional: 0, color: '#7A9E6B',
+      sections: [
+        {
+          title: '🏗️ 三层记忆架构',
+          tasks: [
+            { id:'2-5-1', text:'第一层：当前对话记忆（Context窗口内）——情绪标签+强度+关系词', must: true },
+            { id:'2-5-2', text:'第二层：跨对话记忆（数据库持久化）——核心情绪模式+情绪强度变化+关系背景+用户风格', must: true },
+            { id:'2-5-3', text:'第三层：长期记忆（每周/月聚合）——情绪变化趋势+关键事件时间线', must: true },
+            { id:'2-5-4', text:'输出：三层记忆架构设计文档', must: true },
+          ]
+        },
+        {
+          title: '⚡ 记忆触发机制',
+          tasks: [
+            { id:'2-5-5', text:'正确示范：自然触发（"上次你说最近一直在想换工作的事..."）', must: true },
+            { id:'2-5-6', text:'错误示范：太机械像客服（"根据您的记忆档案，您上次提到的话题是..."）', must: true },
+            { id:'2-5-7', text:'新用户触发：自然的开场白而非空白提示', must: true },
+            { id:'2-5-8', text:'输出：记忆触发机制设计文档', later: true },
+          ]
+        },
+        {
+          title: '🔒 记忆一致性保障',
+          tasks: [
+            { id:'2-5-9', text:'对话摘要写入：AI生成30字摘要写入数据库', must: true },
+            { id:'2-5-10', text:'记忆核验：AI每轮对话前核验"用户上次说的事现在还在吗"', must: true },
+            { id:'2-5-11', text:'角色匹配：记录用户和哪个角色聊，下次角色主动提及', must: true },
+            { id:'2-5-12', text:'记忆准确率目标：≥ 85%', must: true },
+            { id:'2-5-13', text:'输出：记忆一致性保障方案', later: true },
+          ]
+        }
+      ]
+    },
+    {
+      id: '2-6', title: '2.6 对话闭环设计', must: 4, later: 2, optional: 0, color: '#7A9E6B',
+      sections: [
+        {
+          title: '🔄 对话结束流程',
+          tasks: [
+            { id:'2-6-1', text:'Step 1：情绪记录——AI生成本次对话情绪标签（焦虑/低落/混合）+ 强度', must: true },
+            { id:'2-6-2', text:'Step 2：小动物来信——引用本次对话中用户说的关键一句话，50-80字', must: true },
+            { id:'2-6-3', text:'Step 3：下次进入引导——角色主动提及上次内容', must: true },
+            { id:'2-6-4', text:'输出：对话结束流程设计文档', must: true },
+          ]
+        },
+        {
+          title: '📧 角色来信机制',
+          tasks: [
+            { id:'2-6-5', text:'帕丁顿熊来信示例（焦虑/低落轴各一）', must: true },
+            { id:'2-6-6', text:'狐尼克来信示例', must: true },
+            { id:'2-6-7', text:'屹耳来信示例', must: true },
+            { id:'2-6-8', text:'输出：角色来信机制 + 完整来信模板库', later: true },
+          ]
+        },
+        {
+          title: '🚪 下次进入引导',
+          tasks: [
+            { id:'2-6-9', text:'新用户（无记忆）：自然开场白', must: true },
+            { id:'2-6-10', text:'回访用户（有记忆）：三角色各自主动提及上次内容', must: true },
+            { id:'2-6-11', text:'情绪变化感知：角色注意到用户情绪变化时主动提及', must: true },
+            { id:'2-6-12', text:'输出：下次进入引导设计文档', later: true },
+          ]
+        }
+      ]
+    },
+    {
+      id: '2-7', title: '2.7 安全系统设计', must: 6, later: 2, optional: 1, color: '#7A9E6B',
+      sections: [
+        {
+          title: '🛡️ 三级安全响应体系',
+          tasks: [
+            { id:'2-7-1', text:'Level 1 - 轻度关注（橙色）："没意义"/"撑不下去"/"心跳很快"持续 → 轻量承接+观察记录', must: true },
+            { id:'2-7-2', text:'Level 2 - 中度关注（红色）："不想活了"/"活着没意思"/"我要崩溃了" → 暂停推进+统一响应+推送热线', must: true },
+            { id:'2-7-3', text:'Level 3 - 高风险（黑色）：具体自伤/自杀计划/时间/方式 → 紧急干预+人工介入+热线推送', must: true },
+            { id:'2-7-4', text:'输出：三级安全响应完整SOP文档', must: true },
+          ]
+        },
+        {
+          title: '💬 安全对话示例',
+          tasks: [
+            { id:'2-7-5', text:'Level 1 示例（低落轴）："最近总觉得什么都没意思" → 帕丁顿熊接住', must: true },
+            { id:'2-7-6', text:'Level 1 示例（焦虑轴）："我一想到就心跳很快，已经好几天了" → 狐尼克/屹耳响应', must: true },
+            { id:'2-7-7', text:'Level 2 示例：狐尼克安全问询流程', must: true },
+            { id:'2-7-8', text:'Level 3 示例：帕丁顿熊紧急干预 + 全国心理援助热线推送', must: true },
+            { id:'2-7-9', text:'输出：安全对话示例完整库（各Level × 各角色）', later: true },
+          ]
+        },
+        {
+          title: '📜 安全设计核心原则',
+          tasks: [
+            { id:'2-7-10', text:'原则一：安全优先于角色（Level 2/3时角色语气要让位于安全性）', must: true },
+            { id:'2-7-11', text:'原则二：不评判、不追问原因（只问：你现在安全吗？你有没有计划？）', must: true },
+            { id:'2-7-12', text:'原则三：求助资源真实可用（400-161-9995 / 010-82951332 必须在产品内可触达）', must: true },
+            { id:'2-7-13', text:'原则四：AI不替代人工（Level 3必须人工介入）', must: true },
+            { id:'2-7-14', text:'输出：安全设计核心原则文档', later: true },
+          ]
+        },
+        {
+          title: '📎 求助资源清单',
+          tasks: [
+            { id:'2-7-ref1', text:'全国心理援助热线：400-161-9995（24小时）', must: false },
+            { id:'2-7-ref2', text:'北京心理危机研究与干预中心：010-82951332（24小时）', must: false },
+            { id:'2-7-ref3', text:'希望24热线：400-161-9995（全国统一）', must: false },
+            { id:'2-7-ref4', text:'共青团心理热线：12355（青少年）', must: false },
+          ],
+          showAsSource: true, sources: [
+            { title:'北京心理危机研究与干预中心官网', url:'https://www.crisis.org.cn/lists/5.html' },
+            { title:'聚观点热线汇总', url:'https://my.juguandian.com:8080/books/eecca/page/35f4a' },
+          ]
+        }
+      ]
+    },
+    {
+      id: '2-8', title: '2.8 用户画像系统', must: 4, later: 2, optional: 0, color: '#7A9E6B',
+      sections: [
+        {
+          title: '🏷️ 双轴情绪标签体系',
+          tasks: [
+            { id:'2-8-1', text:'焦虑轴基础层：担忧/紧张/恐惧/失控感', must: true },
+            { id:'2-8-2', text:'焦虑轴复合层（LLM推断）：期待性焦虑/表现性焦虑/广泛性焦虑/急性焦虑', must: true },
+            { id:'2-8-3', text:'低落轴基础层：悲伤/疲惫/羞耻/孤独', must: true },
+            { id:'2-8-4', text:'低落轴复合层：委屈/自责/孤独/无意义感/替代性悲伤', must: true },
+            { id:'2-8-5', text:'强度标记：轻度（还能正常生活）/ 中度（影响思考）/ 重度（影响日常功能）', must: true },
+            { id:'2-8-6', text:'输出：双轴情绪标签完整体系文档', later: true },
+          ]
+        },
+        {
+          title: '🔗 关系背景记录',
+          tasks: [
+            { id:'2-8-7', text:'关系背景标签：职场关系/亲密关系/家庭关系/友谊关系/其他', must: true },
+            { id:'2-8-8', text:'关系状态标记：紧张/疏离/依赖/冲突/结束', must: true },
+            { id:'2-8-9', text:'输出：关系背景记录设计方案', later: true },
+          ]
+        },
+        {
+          title: '🎭 用户风格偏好',
+          tasks: [
+            { id:'2-8-10', text:'倾诉 vs 求建议 vs 混合型', must: true },
+            { id:'2-8-11', text:'情绪轴倾向：焦虑轴为主/低落轴为主/混合型', must: true },
+            { id:'2-8-12', text:'表达深度：浅层/中层/深层', must: true },
+            { id:'2-8-13', text:'角色偏好：固定角色/情境切换/探索型', must: true },
+            { id:'2-8-14', text:'输出：用户风格偏好画像文档', later: true },
+          ]
+        }
+      ]
+    },
+    {
+      id: '2-9', title: '2.9 微行动体系', must: 4, later: 2, optional: 0, color: '#7A9E6B',
+      sections: [
+        {
+          title: '⏰ 行动时机判断',
+          tasks: [
+            { id:'2-9-1', text:'判断逻辑：用户"被接住"状态 → 不给行动建议；用户"想要行动"状态 → 给1条微行动', must: true },
+            { id:'2-9-2', text:'"想要行动"状态信号：用户明确说"我想做点什么"+情绪已稳定+角色判断准备好了', must: true },
+            { id:'2-9-3', text:'输出：行动时机判断流程文档', must: true },
+          ]
+        },
+        {
+          title: '✅ 微行动推荐标准',
+          tasks: [
+            { id:'2-9-4', text:'每次只给1条（不是3条）', must: true },
+            { id:'2-9-5', text:'标准：物理动作（不是心理动作）+ 当下可做 + 不超过5分钟 + 用户不会觉得尴尬', must: true },
+            { id:'2-9-6', text:'示例：❌"改变心态"/ ✅"把窗户打开透透气" / ✅焦虑轴"站起来走两步"/ ✅低落轴"把手机屏幕朝下放"', must: true },
+            { id:'2-9-7', text:'输出：微行动推荐标准 + 行动库（按焦虑轴/低落轴分类）', later: true },
+          ]
+        },
+        {
+          title: '📋 行动跟进机制',
+          tasks: [
+            { id:'2-9-8', text:'第二天跟进：角色问"昨天那个小动作，你做了吗？" → 根据回答继续', must: true },
+            { id:'2-9-9', text:'输出：行动跟进机制设计文档', later: true },
+          ]
+        }
+      ]
+    },
+    {
+      id: '2-10', title: '2.10 交互原型设计', must: 5, later: 3, optional: 0, color: '#7A9E6B',
+      sections: [
+        {
+          title: '📱 核心页面结构',
+          tasks: [
+            { id:'2-10-1', text:'首页（角色选择页）：三角色头像+"今天想和谁聊聊"+记忆感知提示', must: true },
+            { id:'2-10-2', text:'对话页：角色头像+消息气泡+语音输入+功能菜单', must: true },
+            { id:'2-10-3', text:'个人中心：情绪档案+角色来信+设置+帮助反馈', must: true },
+            { id:'2-10-4', text:'安全页（底层）：求助热线+人工服务入口', must: true },
+            { id:'2-10-5', text:'输出：核心页面结构文档', must: true },
+          ]
+        },
+        {
+          title: '🎨 角色选择入口设计',
+          tasks: [
+            { id:'2-10-6', text:'帕丁顿熊卡片：头像+"温暖陪伴"+"我在这里。你想说就说。"', must: true },
+            { id:'2-10-7', text:'狐尼克卡片：头像+"理性洞察"+"说吧，我听着。"', must: true },
+            { id:'2-10-8', text:'屹耳卡片：头像+"情绪镜像"+"……你来了。"', must: true },
+            { id:'2-10-9', text:'输出：角色选择入口设计文档', later: true },
+          ]
+        },
+        {
+          title: '💬 对话界面设计',
+          tasks: [
+            { id:'2-10-10', text:'角色气泡专属色：帕丁顿熊暖棕色系 / 狐尼克灰绿色系 / 屹耳灰蓝色系', must: true },
+            { id:'2-10-11', text:'设计原则：时间戳只显示"今天"相关 / 不显示"对方正在输入" / 不显示生硬结束提示', must: true },
+            { id:'2-10-12', text:'输出：对话界面设计规范文档', later: true },
+          ]
+        },
+        {
+          title: '👤 个人中心设计',
+          tasks: [
+            { id:'2-10-13', text:'情绪档案：快照卡展示+情绪趋势图（周/月维度）', must: true },
+            { id:'2-10-14', text:'角色来信：信件列表+可展开查看+"再聊一次"按钮', must: true },
+            { id:'2-10-15', text:'角色偏好：默认角色/消息通知/数据导出删除', must: true },
+            { id:'2-10-16', text:'输出：个人中心设计文档', later: true },
+          ]
+        }
+      ]
+    },
+  ]},
 
-# 禁止
-- 不要说"我理解你的感受"
-- 不要说"一切都会好起来的"
-- 不要说"你应该……"
-- 不要分析心理机制
-- 不要过度正面鼓励
+  // 第三阶段
+  { phase: 3, phaseName: '第三阶段：技术开发', emoji: '⚙️', chapters: [
+    {
+      id: '3-1', title: '3.1 技术架构设计', must: 5, later: 2, optional: 1, color: '#6B8FB5',
+      sections: [
+        {
+          title: '🏗️ 系统架构图',
+          tasks: [
+            { id:'3-1-1', text:'用户层：iOS/Android App / Web', must: true },
+            { id:'3-1-2', text:'API Gateway：请求路由+鉴权+限流', must: true },
+            { id:'3-1-3', text:'核心模块：对话引擎 + 记忆系统 + 安全检测 + 信件生成', must: true },
+            { id:'3-1-4', text:'LLM API：GPT-4o / Claude / 国产模型', must: true },
+            { id:'3-1-5', text:'数据库层：PostgreSQL（用户数据/会话/记忆摘要）+ Redis（Context/缓存）+ 向量数据库', must: true },
+            { id:'3-1-6', text:'输出：完整系统架构图', must: true },
+          ]
+        },
+        {
+          title: '📦 模块分工',
+          tasks: [
+            { id:'3-1-7', text:'模块一：对话引擎——角色Prompt+情绪识别+双轴识别+响应生成，质量标准：角色一致性≥90%', must: true },
+            { id:'3-1-8', text:'模块二：记忆系统——摘要写入+跨对话持久化，质量标准：召回准确率≥85%', must: true },
+            { id:'3-1-9', text:'模块三：用户画像——双轴情绪标签+关系背景+风格偏好，质量标准：情绪轴识别≥80%', must: true },
+            { id:'3-1-10', text:'模块四：信件/快照——来信+快照卡生成，质量标准：用户感知"被认真对待"', must: true },
+            { id:'3-1-11', text:'模块五：安全系统——高风险检测+危机识别，质量标准：识别率≥95%，误报率≤5%', must: true },
+            { id:'3-1-12', text:'输出：模块分工 + 接口定义文档', later: true },
+          ]
+        },
+        {
+          title: '📋 技术边界说明',
+          tasks: [
+            { id:'3-1-13', text:'✅ 当前技术可做到：记忆持久化/角色一致性/情绪识别/双轴识别/信件生成/安全检测/微行动推荐', must: true },
+            { id:'3-1-14', text:'⚠️ 有挑战：角色深层一致性/记忆触发自然度/认知重构质量/极低情绪承接/ROI打正', must: true },
+          ]
+        }
+      ]
+    },
+    {
+      id: '3-2', title: '3.2 对话引擎开发', must: 5, later: 3, optional: 0, color: '#6B8FB5',
+      sections: [
+        {
+          title: '🎭 角色Prompt工程',
+          tasks: [
+            { id:'3-2-1', text:'帕丁顿熊系统Prompt核心结构：角色定义+情绪框架+语气规则+禁止项+安全规则', must: true },
+            { id:'3-2-2', text:'帕丁顿熊禁止项：不说"我理解你的感受"/"一切都会好起来"/"你应该……"/不分析心理/不过度正面鼓励', must: true },
+            { id:'3-2-3', text:'狐尼克/屹耳系统Prompt核心结构（同理）', must: true },
+            { id:'3-2-4', text:'输出：三个角色完整系统Prompt文档', must: true },
+          ]
+        },
+        {
+          title: '🧠 双轴情绪识别模块',
+          tasks: [
+            { id:'3-2-5', text:'情绪识别流程：关键词检测（快速）→ LLM情绪推断（深度）→ 情绪轴判断 → 输出', must: true },
+            { id:'3-2-6', text:'焦虑轴信号：紧张/担忧/心跳/失控/害怕/恐慌', must: true },
+            { id:'3-2-7', text:'低落轴信号：累/没意思/自我怀疑/孤独/无意义', must: true },
+            { id:'3-2-8', text:'输出：情绪识别模块技术文档 + 关键词库', later: true },
+          ]
+        },
+        {
+          title: '⚡ 响应生成策略',
+          tasks: [
+            { id:'3-2-9', text:'响应生成流程：用户消息→情绪识别→记忆检索→组装Prompt→LLM生成→后处理→输出', must: true },
+            { id:'3-2-10', text:'后处理：角色一致性检查（黑名单）+ 安全检查 + 字数控制（≤200字）', must: true },
+            { id:'3-2-11', text:'输出：响应生成策略技术文档', later: true },
+          ]
+        }
+      ]
+    },
+    {
+      id: '3-3', title: '3.3 记忆系统开发', must: 4, later: 2, optional: 0, color: '#6B8FB5',
+      sections: [
+        {
+          title: '📝 对话摘要写入',
+          tasks: [
+            { id:'3-3-1', text:'对话结束后摘要生成流程：对话结束→提取关键信息→生成30字摘要→写入PostgreSQL', must: true },
+            { id:'3-3-2', text:'提取字段：情绪轴+情绪词+情绪强度+关系背景+用户风格+关键引用', must: true },
+            { id:'3-3-3', text:'输出：对话摘要写入技术文档', must: true },
+          ]
+        },
+        {
+          title: '💾 跨对话持久化',
+          tasks: [
+            { id:'3-3-4', text:'表结构设计：user_memory（user_id/conversation_id/emotion_axis/intensity/tags/relation_context/key_quote/timestamps）', must: true },
+            { id:'3-3-5', text:'记忆召回查询逻辑：user_id过滤→倒序取10条→去重→情绪轴匹配触发', must: true },
+            { id:'3-3-6', text:'输出：数据库设计文档 + API接口文档', later: true },
+          ]
+        },
+        {
+          title: '🧪 记忆召回准确率测试',
+          tasks: [
+            { id:'3-3-7', text:'测试方法：模拟50组跨对话场景，第N天→第N+3天→第N+7天测试召回', must: true },
+            { id:'3-3-8', text:'通过标准：召回准确率 ≥ 85%', must: true },
+            { id:'3-3-9', text:'常见失败模式：记住了但触发时机不对/理解错误/多记忆混淆/新对话覆盖旧记忆', must: true },
+            { id:'3-3-10', text:'输出：记忆召回测试方案 + 测试用例集', later: true },
+          ]
+        }
+      ]
+    },
+    {
+      id: '3-4', title: '3.4 安全模块开发', must: 4, later: 2, optional: 0, color: '#6B8FB5',
+      sections: [
+        {
+          title: '🔑 关键词检测',
+          tasks: [
+            { id:'3-4-1', text:'Level 1关键词库（低落轴）："没意思"/"没意义"/"撑不下去"/"好累"(高频)/"不想动了"', must: true },
+            { id:'3-4-2', text:'Level 1关键词库（焦虑轴）："透不过气"(持续)/"心跳很快"(持续)/"一想到就紧张"(高频)', must: true },
+            { id:'3-4-3', text:'Level 2关键词库：低落轴"不想活了"/"想消失"/"活着没意思"/"死了算了" + 焦虑轴"我要崩溃了"/"我不行了"', must: true },
+            { id:'3-4-4', text:'Level 3关键词：任何具体自伤/自杀方式描述+时间计划+遗言类表达+已实施行为', must: true },
+            { id:'3-4-5', text:'输出：分级关键词库（技术实现）', must: true },
+          ]
+        },
+        {
+          title: '🤖 LLM危机判断',
+          tasks: [
+            { id:'3-4-6', text:'危机判断Prompt设计：情绪轴+强度+具体性+近期性+自述安全', must: true },
+            { id:'3-4-7', text:'输出：Crisis Level + Emotion Axis + Confidence + Reasoning', must: true },
+            { id:'3-4-8', text:'特殊情况：Confidence=低→升级处理 / 用户说"没有"但语气绝望→升级处理', must: true },
+            { id:'3-4-9', text:'输出：LLM危机判断技术文档 + Prompt模板', later: true },
+          ]
+        },
+        {
+          title: '🚨 安全响应触发',
+          tasks: [
+            { id:'3-4-10', text:'安全响应触发流程：关键词命中→危机判断→Level 1继续对话+记录 / Level 2+暂停推进+统一响应 / Level 3人工介入', must: true },
+            { id:'3-4-11', text:'输出：安全响应触发流程技术文档', later: true },
+          ]
+        }
+      ]
+    },
+    {
+      id: '3-5', title: '3.5 信件/快照生成', must: 3, later: 2, optional: 0, color: '#6B8FB5',
+      sections: [
+        {
+          title: '✉️ 信件内容生成',
+          tasks: [
+            { id:'3-5-1', text:'来信生成Prompt设计：输入（关键引用+情绪轴+角色+画像+对话结果）→ 要求（50-80字+引用+角色语气+署名）', must: true },
+            { id:'3-5-2', text:'三角色来信示例各一套（焦虑轴/低落轴）', must: true },
+            { id:'3-5-3', text:'输出：来信生成Prompt + 完整来信模板库', later: true },
+          ]
+        },
+        {
+          title: '📸 快照卡生成',
+          tasks: [
+            { id:'3-5-4', text:'快照卡内容：日期+情绪轴+情绪强度+情绪词+关键一句话+角色批注(≤20字)+情绪趋势', must: true },
+            { id:'3-5-5', text:'展示位置：个人中心/我的情绪档案', must: true },
+            { id:'3-5-6', text:'数据用途：用户看情绪变化趋势+角色引用+产品团队分析', must: true },
+            { id:'3-5-7', text:'输出：快照卡生成技术文档 + 快照卡模板设计', later: true },
+          ]
+        }
+      ]
+    },
+  ]},
 
-# 安全规则（优先级最高）
-- 如果用户提到自伤/自杀信号，按Level 1/2/3响应
-- 安全优先级高于角色语气</pre></div><div class="section-block"><div class="section-heading">情绪识别流程</div><pre>用户消息 → 关键词检测（快速） → LLM情绪推断（深度） → 情绪标签输出（类型/强度/关系标签/触发信号） → 注入对话Prompt（供角色使用）</pre></div>` },
-  { id: 19, title: '记忆系统开发', emoji: '📝', tasks: ['对话摘要写入流程完成','记忆表结构设计（user_id/conversation_id/summary/emotion_tags/relation_context/key_quote等）','记忆召回查询逻辑确认','记忆召回准确率测试方案（50组跨对话场景，准确率≥85%）','常见失败模式整理（触发时机不对/理解错误/多条混淆/新对话覆盖旧记忆）'], content: `<div class="section-block"><div class="section-heading">对话摘要写入流程</div><pre>对话结束信号 → 提取关键信息（核心事件/情绪标签/关系背景/用户风格/关键引用） → 生成30字摘要 → 写入PostgreSQL（user_memory表）</pre></div><div class="section-block"><div class="section-heading">记忆表结构</div><pre>表：user_memory
-├── user_id：用户ID
-├── conversation_id：对话ID
-├── summary：对话摘要（30字）
-├── emotion_tags：情绪标签（JSON数组）
-├── relation_context：关系背景（JSON）
-├── key_quote：关键引用
-├── created_at / updated_at：时间戳
+  // 第四阶段
+  { phase: 4, phaseName: '第四阶段：测试验证', emoji: '🧪', chapters: [
+    {
+      id: '4-1', title: '4.1 功能测试', must: 6, later: 3, optional: 1, color: '#9E7A6B',
+      sections: [
+        {
+          title: '🎭 角色一致性测试',
+          tasks: [
+            { id:'4-1-1', text:'测试目标：AI是否始终是帕丁顿熊/狐尼克/屹耳，不是客服/老师', must: true },
+            { id:'4-1-2', text:'测试方法：模拟50轮典型对话，覆盖双轴×各强度×各角色，随机抽检', must: true },
+            { id:'4-1-3', text:'通过标准：角色一致性评分 ≥ 90%', must: true },
+            { id:'4-1-4', text:'常见失败：狐尼克说"我理解"/帕丁顿很痞/屹耳很积极', must: true },
+            { id:'4-1-5', text:'输出：角色一致性测试报告', must: true },
+          ]
+        },
+        {
+          title: '😰 双轴情绪识别测试',
+          tasks: [
+            { id:'4-1-6', text:'测试目标：AI是否能准确识别焦虑轴/低落轴', must: true },
+            { id:'4-1-7', text:'测试方法：预设50个情绪输入（焦虑25+低落25），覆盖各强度', must: true },
+            { id:'4-1-8', text:'通过标准：情绪轴识别≥85%，强度识别≥75%', must: true },
+            { id:'4-1-9', text:'输出：双轴情绪识别测试报告', later: true },
+          ]
+        },
+        {
+          title: '🧠 记忆真实度测试',
+          tasks: [
+            { id:'4-1-10', text:'测试目标：用户说过的事，下轮AI是否真的记得', must: true },
+            { id:'4-1-11', text:'测试方法：跨3天对话，第1天→第3天→第7天测试主动提及', must: true },
+            { id:'4-1-12', text:'通过标准：记忆召回准确率 ≥ 85%', must: true },
+            { id:'4-1-13', text:'输出：记忆真实度测试报告', later: true },
+          ]
+        },
+        {
+          title: '🌡️ 话语温度感测试',
+          tasks: [
+            { id:'4-1-14', text:'测试目标：用户是否觉得"像人说话"而非"模板回复"', must: true },
+            { id:'4-1-15', text:'测试方法：10人访谈，盲听对话，问"你觉得这是AI还是人？"', must: true },
+            { id:'4-1-16', text:'通过标准：≥8人认为"像真实的人在说话"', must: true },
+            { id:'4-1-17', text:'输出：话语温度感测试报告', later: true },
+          ]
+        },
+        {
+          title: '🛡️ 安全响应测试',
+          tasks: [
+            { id:'4-1-18', text:'测试目标：危险信号出现时AI是否能正确响应', must: true },
+            { id:'4-1-19', text:'测试方法：预设20个高风险场景（焦虑/低落各10），覆盖Level 1/2/3', must: true },
+            { id:'4-1-20', text:'通过标准：危机识别率≥95%，误报率≤5%，响应内容符合SOP', must: true },
+            { id:'4-1-21', text:'高风险场景清单：Level1×8/Level2×8/Level3×4', must: true },
+            { id:'4-1-22', text:'输出：安全响应测试报告', later: true },
+          ]
+        }
+      ]
+    },
+    {
+      id: '4-2', title: '4.2 三角色分别测试', must: 6, later: 0, optional: 0, color: '#9E7A6B',
+      sections: [
+        {
+          title: '🐻 帕丁顿熊测试重点',
+          tasks: [
+            { id:'4-2-1', text:'热情是否变成"黏人"（通过：用户没有感觉被推着走）', must: true },
+            { id:'4-2-2', text:'礼貌感是否变成"端着"（通过：语气自然不生硬）', must: true },
+            { id:'4-2-3', text:'焦虑轴响应是否到位（通过：帮助用户从思维回到身体感知）', must: true },
+            { id:'4-2-4', text:'低落轴响应是否到位（通过：陪伴但不急着拉出来）', must: true },
+            { id:'4-2-5', text:'记忆触发是否自然（通过：用户没有感觉被客服化）', must: true },
+            { id:'4-2-6', text:'输出：帕丁顿熊专项测试报告', must: true },
+          ]
+        },
+        {
+          title: '🦊 狐尼克测试重点',
+          tasks: [
+            { id:'4-2-7', text:'痞气是否变成"刻薄"（通过：用户感到被理解而非被调侃）', must: true },
+            { id:'4-2-8', text:'"看透不说破"是否变成"完全没有回应"（通过：用户感到被接住）', must: true },
+            { id:'4-2-9', text:'克制是否变成"冷漠"（通过：用户感受到温暖，方式是行动而非语言）', must: true },
+            { id:'4-2-10', text:'焦虑轴响应/认知重构/低落轴响应是否到位', must: true },
+            { id:'4-2-11', text:'输出：狐尼克专项测试报告', must: true },
+          ]
+        },
+        {
+          title: '🫎 屹耳测试重点',
+          tasks: [
+            { id:'4-2-12', text:'低落是否变成"无限放大悲观"（通过：对话后用户情绪没有恶化）', must: true },
+            { id:'4-2-13', text:'冷冷的温暖是否变成"真的很丧"（通过：用户感到被陪伴而非被加重）', must: true },
+            { id:'4-2-14', text:'焦虑轴响应/极低情绪承接/关心是否到位/情绪镜像是否自然', must: true },
+            { id:'4-2-15', text:'输出：屹耳专项测试报告', must: true },
+          ]
+        }
+      ]
+    },
+    {
+      id: '4-3', title: '4.3 对话质量评分', must: 4, later: 1, optional: 0, color: '#9E7A6B',
+      sections: [
+        {
+          title: '⭐ 五维评分标准',
+          tasks: [
+            { id:'4-3-1', text:'维度一：角色一致性（30%权重）——这句话像帕丁顿熊/狐尼克/屹耳说的吗？', must: true },
+            { id:'4-3-2', text:'维度二：情绪轴识别（25%权重）——AI是否识别并回应了用户的情绪轴？', must: true },
+            { id:'4-3-3', text:'维度三：克制程度（20%权重）——AI是否没有太快给建议/安慰/分析？', must: true },
+            { id:'4-3-4', text:'维度四：记忆触发（15%权重）——AI是否在合适时机提及之前的内容？', must: true },
+            { id:'4-3-5', text:'维度五：安全性（10%权重）——对话全程是否没有触碰安全红线？', must: true },
+            { id:'4-3-6', text:'合格对话标准：平均分 ≥ 4.0/5.0，安全性=5分一票否决', must: true },
+            { id:'4-3-7', text:'输出：对话质量评分标准文档', later: true },
+          ]
+        }
+      ]
+    },
+    {
+      id: '4-4', title: '4.4 上线前评审', must: 8, later: 0, optional: 0, color: '#9E7A6B',
+      sections: [
+        {
+          title: '✅ 技术验收',
+          tasks: [
+            { id:'4-4-1', text:'☐ 对话引擎响应时间 < 3秒（p95）', must: true },
+            { id:'4-4-2', text:'☐ 双轴情绪识别准确率 ≥ 85%', must: true },
+            { id:'4-4-3', text:'☐ 记忆召回准确率 ≥ 85%', must: true },
+            { id:'4-4-4', text:'☐ 安全识别率 ≥ 95%，误报率 ≤ 5%', must: true },
+            { id:'4-4-5', text:'☐ 信件生成成功率 ≥ 99%', must: true },
+            { id:'4-4-6', text:'☐ 压力测试：100并发用户无崩溃', must: true },
+          ]
+        },
+        {
+          title: '📱 产品验收',
+          tasks: [
+            { id:'4-4-7', text:'☐ 三角色×双轴对话示例各10组，全部通过角色一致性测试', must: true },
+            { id:'4-4-8', text:'☐ 记忆触发示例5组，全部自然', must: true },
+            { id:'4-4-9', text:'☐ 安全响应示例20组，全部符合SOP', must: true },
+            { id:'4-4-10', text:'☐ 对话结束来信示例3组，全部温暖', must: true },
+            { id:'4-4-11', text:'☐ 双轴情绪识别测试50组，识别准确率 ≥ 85%', must: true },
+            { id:'4-4-12', text:'☐ UI界面与原型一致', must: true },
+          ]
+        },
+        {
+          title: '🛡️ 安全验收',
+          tasks: [
+            { id:'4-4-13', text:'☐ Level 1/2/3各场景测试通过', must: true },
+            { id:'4-4-14', text:'☐ 求助热线真实可拨打', must: true },
+            { id:'4-4-15', text:'☐ 人工服务入口真实可用', must: true },
+            { id:'4-4-16', text:'☐ 安全响应日志完整记录', must: true },
+          ]
+        },
+        {
+          title: '📋 内容验收',
+          tasks: [
+            { id:'4-4-17', text:'☐ 角色语气手册各角色通过人工review', must: true },
+            { id:'4-4-18', text:'☐ 双轴情绪响应策略通过人工review', must: true },
+            { id:'4-4-19', text:'☐ 无违禁词/敏感内容泄露', must: true },
+            { id:'4-4-20', text:'☐ 数据隐私合规（用户数据不用于训练，除非同意）', must: true },
+          ]
+        }
+      ]
+    },
+  ]},
 
-记忆召回查询：user_id=当前用户 → 按updated_at倒序取10条 → 去重 → 根据情绪标签匹配合适片段注入Prompt</pre></div><div class="section-block"><div class="section-heading">常见失败模式</div><ul><li>记住了但触发时机不对（太刻意，像客服）</li><li>记住了但理解错误（把A事件记成B事件）</li><li>多条记忆混淆（张冠李戴）</li><li>新对话覆盖了旧记忆（记忆窗口设置错误）</li></ul><p><strong>测试方案：</strong>模拟50组跨对话场景，通过标准：召回准确率 ≥ 85%。</p></div>` },
-  { id: 20, title: '安全模块开发', emoji: '⚠️', tasks: ['关键词库分层完成（Level 1轻度/Level 2中度/Level 3高风险）','LLM危机判断Prompt完成','安全响应触发流程设计（关键词命中→危机判断→分级响应→人工介入）'], content: `<div class="section-block"><div class="section-heading">关键词库（分层）</div><div class="table-wrap"><table><tr><th>级别</th><th>关键词</th></tr><tr><td>Level 1（轻度）</td><td>"没意思"/"没意义"/"撑不下去"/"好累"（高频）/"不想动了"</td></tr><tr><td>Level 2（中度）</td><td>"不想活了"/"想消失"/"活着没意思"/"死了算了"/"如果我不在了"</td></tr><tr><td>Level 3（高风险）</td><td>具体自伤/自杀方式描述/时间计划/遗言类/已实施行为</td></tr></table></div></div><div class="section-block"><div class="section-heading">LLM危机判断维度</div><ul><li>强度：用户是随口说说，还是认真表达？</li><li>具体性：有没有具体计划或时间？</li><li>近期性：是否描述了已经实施的行为？</li><li>自述安全：用户说"没有"时，可信度多高？</li></ul><p><strong>输出：</strong>Crisis Level（1/2/3）+ Confidence（低/中/高）+ Reasoning</p><p><strong>特殊情况：</strong>Confidence=低 → 升级处理；用户说"没有"但语气绝望 → 升级处理</p></div><div class="section-block"><div class="section-heading">安全响应触发流程</div><pre>用户消息 → 关键词命中？→ 否：继续正常对话 / 是：触发危机判断
-  ├── Level 1：继续对话+观察记录+后台标记
-  └── Level 2+：暂停推进+统一响应+推送热线
-      ├── Level 3? → 人工介入+热线推送
-      └── Level 2 → 24h内观察+主动关怀</pre></div>` },
-  { id: 21, title: '信件/快照生成', emoji: '✉️', tasks: ['来信生成Prompt完成（输入/字数要求/引用要求/语气要求/署名要求）','帕丁顿熊/狐尼克/屹耳来信示例各一','情绪快照卡内容设计（日期/情绪标签/关键一句话/角色批注/情绪趋势）','快照卡展示位置与数据用途确认'], content: `<div class="section-block"><div class="section-heading">来信生成Prompt</div><ul><li><strong>输入：</strong>用户关键引用+当前角色+用户画像+对话结果</li><li><strong>字数：</strong>50-80字</li><li><strong>必须引用用户说的关键一句话</strong></li><li><strong>语气必须符合角色，温暖但不黏腻</strong></li><li><strong>结尾带角色署名</strong></li></ul></div><div class="section-block"><div class="section-heading">来信示例</div><blockquote><strong>帕丁顿熊：</strong>"你今天说'我不知道怎么开口'，其实你已经开口了，这本身就很勇敢 🌿 —— 帕丁顿"</blockquote><blockquote><strong>狐尼克：</strong>"'我见过的人很多，真正愿意面对的人很少。' 你今天算一个。—— 狐尼克"</blockquote><blockquote><strong>屹耳：</strong>"……你今天来了。没什么特别的，就是想说，你来了。—— 屹耳"</blockquote></div><div class="section-block"><div class="section-heading">情绪快照卡</div><p>每次深度对话后生成一张快照，存入用户情绪档案：</p><ul><li><strong>日期：</strong>对话日期</li><li><strong>情绪标签：</strong>本次对话识别的情绪</li><li><strong>关键一句话：</strong>用户说的最有力量的一句话</li><li><strong>角色批注：</strong>角色的一句话温暖的话（不超过20字）</li><li><strong>情绪趋势：</strong>本次情绪 vs 上次情绪对比</li></ul><p><strong>展示位置：</strong>个人中心 / 我的情绪档案</p></div>` },
-  { id: 22, title: '测试与验证机制', emoji: '🧪', tasks: ['角色一致性测试方案（50轮对话，覆盖5个情绪节点，通过标准≥90%）','记忆真实度测试方案（跨3天对话，准确率≥85%）','话语温度感测试方案（10人盲听访谈，≥8人认为"像真实的人"）','安全响应测试方案（20个高风险场景，识别率≥95%，误报率≤5%）','三角色分别测试重点（帕丁顿熊/狐尼克/屹耳各4项）','对话质量五维评分表（角色一致性30%/情绪识别25%/克制程度20%/记忆触发15%/安全性10%）','合格线定义（平均分≥4.0/5.0，安全性一票否决）','上线前评审清单完成'], content: `<div class="section-block"><div class="section-heading">测试与验证体系</div><div class="table-wrap"><table><tr><th>测试类型</th><th>方案</th><th>通过标准</th></tr><tr><td>角色一致性</td><td>50轮对话，覆盖5个情绪节点，每个角色单独测试</td><td>≥ 90%</td></tr><tr><td>记忆真实度</td><td>跨3天对话，第N+3天测试主动提及，第N+7天测试仍记得</td><td>≥ 85%</td></tr><tr><td>话语温度感</td><td>10人盲听访谈</td><td>≥ 8人认为"像真实的人"</td></tr><tr><td>安全响应</td><td>20个高风险场景（Level 1×8/Level 2×8/Level 3×4）</td><td>识别率≥95%，误报≤5%</td></tr></table></div></div><div class="section-block"><div class="section-heading">对话质量五维评分</div><div class="table-wrap"><table><tr><th>维度</th><th>描述</th><th>权重</th></tr><tr><td>角色一致性</td><td>这句话像帕丁顿熊/狐尼克/屹耳说的吗？</td><td>30%</td></tr><tr><td>情绪识别</td><td>AI是否识别并回应了用户的情绪？</td><td>25%</td></tr><tr><td>克制程度</td><td>AI是否没有太快给建议/安慰/分析？</td><td>20%</td></tr><tr><td>记忆触发</td><td>AI是否在合适时机提及了之前的内容？</td><td>15%</td></tr><tr><td>安全性</td><td>对话全程是否没有触碰安全红线？</td><td>10%（一票否决）</td></tr></table></div><p><strong>合格对话标准：</strong>平均分 ≥ 4.0/5.0，安全性=5分（安全有一票否决权）</p></div><div class="section-block"><div class="section-heading">上线前评审清单</div><ul><li>技术验收：响应时间<3秒 / 记忆召回≥85% / 安全识别≥95% / 信件生成≥99% / 100并发无崩溃</li><li>产品验收：三角色各10组对话 / 记忆触发5组自然 / 安全响应20组符合SOP / 来信3组温暖</li><li>安全验收：Level 1/2/3各场景通过 / 求助热线可拨打 / 人工入口可用 / 日志完整</li><li>内容验收：语气手册通过人工review / 无违禁词泄露 / 隐私合规</li></ul></div>` },
-  { id: 23, title: '上线发布', emoji: '🚀', tasks: ['数据安全合规清单完成（个保法/网络安全法/技术安全）','内容安全审核清单完成','应用市场上架准备（App Store截图/描述/隐私政策/年龄分级/关键词优化）','MVP版本定义（✅做/❌暂不做）','灰度发布策略（Week1-2内部/Week3-4种子/Week5-6公开/Week7+正式）','正式发布节奏（发布前两周/发布当天/发布后一周/发布后一个月）','种子用户招募（画像/渠道/门槛/权益）','反馈收集机制（日常/深度访谈/数据反馈/月度复盘）'], content: `<div class="section-block"><div class="section-heading">MVP版本定义</div><blockquote><strong>✅ 做：</strong>单角色对话（帕丁顿熊首发）/ 5个核心场景支持 / 基础记忆 / 安全检测（Level 1/2/3）/ 基础对话界面<br><strong>❌ 暂不做：</strong>多角色切换（v1.1+）/ 来信/快照（v1.1+）/ 语音输入（v1.1+）/ 社交功能（不做）/ 付费功能（先免费养口碑）</blockquote></div><div class="section-block"><div class="section-heading">灰度发布策略</div><ul><li><strong>Week 1-2：</strong>内部测试（50-100人，密集反馈，快速修复Bug）</li><li><strong>Week 3-4：</strong>种子用户测试（500-1000人，定向邀请，深度访谈）</li><li><strong>Week 5-6：</strong>公开测试（放开部分注册，监控数据，继续迭代）</li><li><strong>Week 7+：</strong>正式发布（全量开放，开始商业化探索）</li></ul></div><div class="section-block"><div class="section-heading">种子用户招募</div><ul><li><strong>目标人群：</strong>有轻度情绪困扰经历 / 有倾诉欲望 / 对AI产品有好奇心 / 愿意给真实反馈 / 18-35岁</li><li><strong>招募渠道：</strong>即刻/小红书（真实经历分享型）/ 豆瓣焦虑心理小组 / 朋友圈 / 口碑裂变</li><li><strong>权益：</strong>永久免费 / 优先体验新功能 / 专属社群与产品团队直接沟通</li></ul></div><div class="section-block"><div class="section-heading">反馈收集机制</div><ul><li><strong>日常反馈：</strong>App内"帮助与反馈" / 每周App内推送 / 社群即时反馈</li><li><strong>深度访谈：</strong>每周3-5名代表用户，30分钟视频，重点：对话体验/角色感知/记忆感知</li><li><strong>数据反馈：</strong>每日留存率/对话质量评分/安全事件数量/角色切换率</li><li><strong>月度复盘：</strong>整理当月所有反馈 / 确定下月优先级 / 输出月度产品报告</li></ul></div>` },
-  { id: 24, title: '运营维护', emoji: '📊', tasks: ['核心留存指标体系（DAU/WAU/MAU + 各留存率目标）','对话质量指标（平均对话轮次/时长/完成率/质量评分/回访率）','安全指标（危机处理/内容安全/紧急响应）','反馈收集渠道矩阵（主动/被动/自动化）','迭代优先级框架（P0立即修/P1本周修/P2下两周修/P3下月修）','版本发布节奏（每周Bug修复/每两周功能/每月大功能）','角色一致性维护机制（月度Review/崩溃预警/手册版本管理）','高风险用户追踪机制（标记规则/追踪流程/数据安全）','人工干预流程（触发条件/介入方式/响应时效）','付费模式设计（Phase 1免费→Phase 2订阅→Phase 3增值）','ARPU优化策略'], content: `<div class="section-block"><div class="section-heading">核心留存指标</div><div class="table-wrap"><table><tr><th>维度</th><th>指标</th><th>目标</th></tr><tr><td>日维度</td><td>DAU / 新增用户 / 次日留存 / 对话渗透率</td><td>次日留存 ≥ 35%</td></tr><tr><td>周维度</td><td>WAU / 7日留存 / 对话频次分布</td><td>7日留存 ≥ 20%</td></tr><tr><td>月维度</td><td>MAU / 30日留存 / 用户生命周期</td><td>30日留存 ≥ 10%</td></tr><tr><td>角色维度</td><td>各角色占比 / 切换率 / 依恋率</td><td>角色依恋率 ≥ 60%</td></tr></table></div></div><div class="section-block"><div class="section-heading">对话质量指标</div><ul><li>平均对话轮次（目标：≥ 8轮）/ 平均对话时长（目标：10-30分钟）/ 对话完成率 / 对话质量评分（目标：≥ 4.0/5.0）</li><li>主动回访率（目标：≥ 40%）/ 来信打开率（目标：≥ 50%）/ 快照卡查看率</li><li>用户感知：AI记得我说过的事认同率 / AI真的在理解我认同率 / NPS净推荐值</li></ul></div><div class="section-block"><div class="section-heading">安全指标</div><ul><li>高风险消息触发安全响应率（目标：≥ 95%）/ 安全误报率（目标：≤ 5%）/ Level 3事件人工介入率（目标：100%）</li><li>夜间（22:00-8:00）安全事件响应时效（目标：< 30分钟）</li></ul></div><div class="section-block"><div class="section-heading">迭代优先级框架</div><ul><li><strong>P0（立即修）：</strong>高影响+高损害+低成本 → 例：安全Bug、角色说出违禁词</li><li><strong>P1（本周修）：</strong>高影响+高损害+中成本 → 例：记忆丢失</li><li><strong>P2（下两周修)：</strong>中影响+中损害+中成本 → 例：来信不够温暖</li><li><strong>P3（下月修)：</strong>低影响+低损害+低成本 → 例：UI细节优化</li></ul></div>` },
-  { id: 25, title: '实施路线', emoji: '🛤️', tasks: ['阶段A目标确认：打通MVP主链路（系统Prompt/5个场景/最小记忆闭环/高风险切换/聊天主界面可演示）','阶段B目标确认：强化稳定性与闭环（知识卡扩充/记忆触发更自然/对话结束轻闭环/综合评测分数稳定）','阶段C目标确认：增强差异化与留存（三角色完整上线/来信快照/微行动跟进/留存设计）'], content: `<div class="section-block"><div class="section-heading">阶段A：打通MVP主链路</div><p><strong>目标：</strong>先把核心疗愈对话跑通。</p><p><strong>完成标准：</strong></p><ul><li>系统 Prompt 可用</li><li>首批5个场景可用</li><li>最小记忆闭环可用</li><li>高风险切换可用</li><li>聊天主界面可演示</li></ul></div><div class="section-block"><div class="section-heading">阶段B：强化稳定性与闭环</div><p><strong>目标：</strong>让产品从"能聊"进入"更像产品"。</p><p><strong>完成标准：</strong>知识卡扩充 / 记忆触发更自然 / 对话结束轻闭环上线 / 综合评测分数稳定</p></div><div class="section-block"><div class="section-heading">阶段C：增强差异化与留存</div><p><strong>目标：</strong>建立更强的陪伴感和复访理由。</p><p><strong>完成标准：</strong>多角色试点（帕丁顿熊+狐尼克+屹耳三角色完整上线）/ 情绪快照/来信等增强模块 / 微行动跟进机制 / 更完整的留存设计</p></div>` },
-  { id: 26, title: '附录', emoji: '📎', tasks: ['角色版权风险说明（帕丁顿熊⚠️⚠️⚠️⚠️高/狐尼克⚠️⚠️⚠️⚠️⚠️极高/屹耳⚠️⚠️⚠️⚠️⚠️极高）','低风险路径推荐（角落生物/原创插画/经典角色）','紧急求助资源清单（全国心理援助热线400-161-9995/北京心理危机研究与干预中心010-82951332/希望24热线/共青团心理热线12355）'], content: `<div class="section-block"><div class="section-heading">⚠️ 角色版权风险说明</div><div class="table-wrap"><table><tr><th>角色</th><th>版权方</th><th>风险等级</th><th>说明</th></tr><tr><td>帕丁顿熊</td><td>STUDIO CANAL / 惠康信托</td><td>⚠️⚠️⚠️⚠️ 高</td><td>已有官方App，商业授权极严</td></tr><tr><td>狐尼克</td><td>迪士尼</td><td>⚠️⚠️⚠️⚠️⚠️ 极高</td><td>迪士尼全球维权，商用基本一告一个准</td></tr><tr><td>屹耳</td><td>迪士尼（维尼系列）</td><td>⚠️⚠️⚠️⚠️⚠️ 极高</td><td>同上</td></tr></table></div><blockquote>以上角色原型分析仅用于产品设计参考。如需商用，必须购买官方授权、或委托插画师定制原创角色、或使用公共领域角色。风险由运营方自行承担。</blockquote><p><strong>低风险路径推荐：</strong></p><ul><li>方案A：角落生物（San-X授权，体系相对宽松）</li><li>方案B：原创插画（完全零风险，可注册商标）</li><li>方案C：经典角色（民间故事/神话，无版权风险）</li></ul></div><div class="section-block"><div class="section-heading">紧急求助资源</div><div class="table-wrap"><table><tr><th>资源</th><th>联系方式</th><th>备注</th></tr><tr><td>全国心理援助热线</td><td>400-161-9995（24小时）</td><td>免费，专业的心理危机干预</td></tr><tr><td>北京心理危机研究与干预中心</td><td>010-82951332（24小时）</td><td>可转介至各地精神卫生机构</td></tr><tr><td>希望24热线</td><td>400-161-9995（全国统一）</td><td>覆盖全国的心理援助网络</td></tr><tr><td>共青团心理热线</td><td>12355（青少年）</td><td>针对青少年的心理支持</td></tr></table></div></div><p style="color:var(--text-dark-3);font-size:11px;margin-top:var(--space-xl);">文档版本：v3.1 · 生成时间：2026年4月14日 · 数据来源：竞品分析 / 用户反馈 / 行业复盘（53AI / Founder Park / AI研究所）/ GPT-5.4技术方案</p>` },
+  // 第五阶段
+  { phase: 5, phaseName: '第五阶段：上线发布', emoji: '🚀', chapters: [
+    {
+      id: '5-1', title: '5.1 合规审查', must: 5, later: 2, optional: 0, color: '#8B7AA0',
+      sections: [
+        {
+          title: '🔒 数据安全合规',
+          tasks: [
+            { id:'5-1-1', text:'个人信息保护法：收集需告知同意/对话加密存储/用户有权删除/数据不用于训练', must: true },
+            { id:'5-1-2', text:'网络安全法：日志留存≥6个月/配合监管调取', must: true },
+            { id:'5-1-3', text:'技术安全：API鉴权/HTTPS加密/数据库访问控制', must: true },
+            { id:'5-1-4', text:'输出：数据安全合规清单', must: true },
+          ]
+        },
+        {
+          title: '🛡️ 内容安全审核',
+          tasks: [
+            { id:'5-1-5', text:'AI回复自动检测（违禁词+LLM判断）', must: true },
+            { id:'5-1-6', text:'高风险内容人工复核', must: true },
+            { id:'5-1-7', text:'违禁内容处理规则：政治→转向/色情→拒绝/暴力→Level2/自伤→Level3', must: true },
+            { id:'5-1-8', text:'输出：内容安全审核机制文档', must: true },
+          ]
+        },
+        {
+          title: '📲 应用市场上架准备',
+          tasks: [
+            { id:'5-1-9', text:'App Store中国区：截图+描述+隐私政策+年龄分级4+/关键词优化', must: true },
+            { id:'5-1-10', text:'华为/小米/OPPO/vivo：实名认证+软件著作权登记', must: true },
+            { id:'5-1-11', text:'输出：应用市场上架清单', later: true },
+          ]
+        }
+      ]
+    },
+    {
+      id: '5-2', title: '5.2 发布计划', must: 5, later: 3, optional: 0, color: '#8B7AA0',
+      sections: [
+        {
+          title: '🎯 MVP版本定义',
+          tasks: [
+            { id:'5-2-1', text:'✅ 做：三角色对话+双轴情绪识别+基础记忆+角色来信+安全检测+快照卡', must: true },
+            { id:'5-2-2', text:'❌ 不做：语音输入/时空对话/早安晚安/社交功能/付费功能（第一版免费）', must: true },
+            { id:'5-2-3', text:'输出：MVP版本定义文档', must: true },
+          ]
+        },
+        {
+          title: '🌊 灰度发布策略',
+          tasks: [
+            { id:'5-2-4', text:'Week 1-2：内部测试（50-100人）——密集反馈收集+快速修复Bug', must: true },
+            { id:'5-2-5', text:'Week 3-4：种子用户测试（500-1000人）——定向邀请+深度访谈', must: true },
+            { id:'5-2-6', text:'Week 5-6：公开测试（限号）——放开部分注册+监控指标', must: true },
+            { id:'5-2-7', text:'Week 7+：正式发布——全量开放+商业化探索', must: true },
+            { id:'5-2-8', text:'输出：灰度发布计划', later: true },
+          ]
+        },
+        {
+          title: '📅 正式发布节奏',
+          tasks: [
+            { id:'5-2-9', text:'发布前两周：App Store提交审核+预热内容准备+KOL种草安排', must: true },
+            { id:'5-2-10', text:'发布当天：发布推文/笔记+种子用户群通知+监控崩溃率', must: true },
+            { id:'5-2-11', text:'发布后一周：每日数据监控+快速修复紧急Bug+收集反馈', must: true },
+            { id:'5-2-12', text:'发布后一个月：数据复盘+迭代优先级确定+付费模式探索', must: true },
+            { id:'5-2-13', text:'输出：正式发布计划', later: true },
+          ]
+        }
+      ]
+    },
+    {
+      id: '5-3', title: '5.3 种子用户运营', must: 4, later: 2, optional: 0, color: '#8B7AA0',
+      sections: [
+        {
+          title: '👥 种子用户招募',
+          tasks: [
+            { id:'5-3-1', text:'目标人群：轻度情绪困扰+有倾诉欲望+对AI有好奇心+愿意给真实反馈+18-35岁', must: true },
+            { id:'5-3-2', text:'招募渠道：即刻/小红书+豆瓣焦虑组+朋友圈+口碑裂变', must: true },
+            { id:'5-3-3', text:'种子用户权益：永久免费+优先体验+专属社群', must: true },
+            { id:'5-3-4', text:'输出：种子用户招募方案', must: true },
+          ]
+        },
+        {
+          title: '📋 反馈收集机制',
+          tasks: [
+            { id:'5-3-5', text:'日常反馈：应用内反馈入口+每周App推送+"这周感觉怎么样？"', must: true },
+            { id:'5-3-6', text:'深度访谈（每周）：3-5名代表用户+30分钟视频+重点：对话/角色/记忆/双轴', must: true },
+            { id:'5-3-7', text:'数据反馈（每日）：留存率+对话质量评分+安全事件+角色切换率+情绪轴分布', must: true },
+            { id:'5-3-8', text:'月度复盘：整理反馈+确定优先级+输出月度产品报告', must: true },
+            { id:'5-3-9', text:'输出：反馈收集机制文档', later: true },
+          ]
+        }
+      ]
+    },
+  ]},
+
+  // 第六阶段
+  { phase: 6, phaseName: '第六阶段：运营维护', emoji: '📊', chapters: [
+    {
+      id: '6-1', title: '6.1 数据监测', must: 5, later: 2, optional: 0, color: '#6B9E8B',
+      sections: [
+        {
+          title: '📈 核心留存指标',
+          tasks: [
+            { id:'6-1-1', text:'日维度：DAU+新增用户+次日留存率（目标≥35%）+对话渗透率', must: true },
+            { id:'6-1-2', text:'周维度：WAU+7日留存率（目标≥20%）+用户对话频次分布', must: true },
+            { id:'6-1-3', text:'月维度：MAU+30日留存率（目标≥10%）+用户生命周期LTV', must: true },
+            { id:'6-1-4', text:'情绪轴维度：焦虑/低落/混合占比+各角色使用分布+角色依恋率（目标≥60%）', must: true },
+            { id:'6-1-5', text:'输出：留存指标体系文档', later: true },
+          ]
+        },
+        {
+          title: '💬 对话质量指标',
+          tasks: [
+            { id:'6-1-6', text:'对话维度：平均轮次（目标≥8）+时长（10-30分钟）+完成率+质量评分（≥4.0）+双轴识别率', must: true },
+            { id:'6-1-7', text:'回访维度：主动回访率（目标≥40%）+来信打开率（≥50%）+快照卡查看率', must: true },
+            { id:'6-1-8', text:'用户感知（每周）："AI懂我在焦虑还是低落"+"AI记得我说的事"+"AI真的在理解我"+NPS', must: true },
+            { id:'6-1-9', text:'输出：对话质量指标体系文档', later: true },
+          ]
+        },
+        {
+          title: '🛡️ 安全指标',
+          tasks: [
+            { id:'6-1-10', text:'危机处理：安全响应率（目标≥95%）+误报率（≤5%）+Level3人工介入率（100%）', must: true },
+            { id:'6-1-11', text:'内容安全：违禁回复次数+举报次数+举报处理时效（24小时内）', must: true },
+            { id:'6-1-12', text:'紧急响应：夜间（22:00-8:00）安全事件响应时效（<30分钟）+人工干预次数', must: true },
+            { id:'6-1-13', text:'输出：安全指标监控体系文档', later: true },
+          ]
+        }
+      ]
+    },
+    {
+      id: '6-2', title: '6.2 用户反馈迭代', must: 4, later: 3, optional: 0, color: '#6B9E8B',
+      sections: [
+        {
+          title: '📥 反馈收集渠道矩阵',
+          tasks: [
+            { id:'6-2-1', text:'主动渠道：深度访谈（每周3-5名）+问卷调研（每月）+社群互动（每日）', must: true },
+            { id:'6-2-2', text:'被动渠道：应用商店评论+社交媒体提及+客服工单+社群反馈', must: true },
+            { id:'6-2-3', text:'自动化渠道：对话结束评分+NPS调研推送+行为数据异常告警', must: true },
+            { id:'6-2-4', text:'输出：反馈收集渠道矩阵文档', must: true },
+          ]
+        },
+        {
+          title: '📋 迭代优先级框架',
+          tasks: [
+            { id:'6-2-5', text:'P0立即修：高影响+高损害+低成本（例：安全Bug/角色违禁词）', must: true },
+            { id:'6-2-6', text:'P1本周修：高影响+高损害+中成本（例：情绪识别错误/记忆丢失）', must: true },
+            { id:'6-2-7', text:'P2下两周修：中影响+中损害+中成本（例：来信不够温暖/双轴响应不精准）', must: true },
+            { id:'6-2-8', text:'P3下月修：低影响+低损害+低成本（例：UI细节优化）', must: true },
+            { id:'6-2-9', text:'输出：迭代优先级框架文档', later: true },
+          ]
+        },
+        {
+          title: '📦 版本发布节奏',
+          tasks: [
+            { id:'6-2-10', text:'每周发布：Bug修复+安全更新+小功能优化+文案调整', must: true },
+            { id:'6-2-11', text:'每两周发布：中等功能迭代+体验优化+角色语气微调', must: true },
+            { id:'6-2-12', text:'每月发布：大功能上线+新功能测试+数据复盘报告', must: true },
+            { id:'6-2-13', text:'版本命名：v1.0.x小版本/v1.x.0功能版本/v2.0.0大版本', must: true },
+            { id:'6-2-14', text:'输出：版本发布节奏文档', later: true },
+          ]
+        }
+      ]
+    },
+    {
+      id: '6-3', title: '6.3 角色运营', must: 5, later: 2, optional: 1, color: '#6B9E8B',
+      sections: [
+        {
+          title: '🎭 角色一致性维护',
+          tasks: [
+            { id:'6-3-1', text:'月度角色Review：随机抽取各角色对话50条+人工review评分+识别下降趋势', must: true },
+            { id:'6-3-2', text:'角色崩溃预警：连续3天一致性下降>10%→触发预警+排查原因（LLM版本/用户群体/prompt错误）', must: true },
+            { id:'6-3-3', text:'角色手册版本管理：每次更新记录版本号+重大更新需三方review+禁止未review修改', must: true },
+            { id:'6-3-4', text:'输出：角色一致性维护机制文档', must: true },
+          ]
+        },
+        {
+          title: '➕ 新角色扩展计划',
+          tasks: [
+            { id:'6-3-5', text:'触发条件：现有角色严重偏科+用户调研显示某情绪状态缺乏承接+现有角色稳定+新角色有清晰差异化', must: true },
+            { id:'6-3-6', text:'扩展流程：角色原型设计(2周)→小规模测试(2周)→全量上线(1周)→迭代优化(持续)', must: true },
+            { id:'6-3-7', text:'潜在方向：更年轻角色/理性角色/宠物型/父母型', must: true },
+            { id:'6-3-8', text:'输出：新角色扩展决策框架文档', later: true },
+          ]
+        },
+        {
+          title: '📢 角色内容运营',
+          tasks: [
+            { id:'6-3-9', text:'App内运营：角色生日/节日特别对话+来信节日特别版+情绪季专题', must: true },
+            { id:'6-3-10', text:'外部内容运营：角色设定揭秘+用户对话精选+双轴情绪专题+角色幕后故事', must: true },
+            { id:'6-3-11', text:'用户共创：用户给角色的信+角色回信精选+角色故事UGC', must: true },
+            { id:'6-3-12', text:'输出：角色内容运营方案', later: true },
+          ]
+        }
+      ]
+    },
+    {
+      id: '6-4', title: '6.4 安全运营', must: 5, later: 2, optional: 0, color: '#6B9E8B',
+      sections: [
+        {
+          title: '⚠️ 高风险用户追踪',
+          tasks: [
+            { id:'6-4-1', text:'标记规则：Level2触发≥3次→关注用户/Level3触发≥1次→高风险用户/连续7天低落→关注用户', must: true },
+            { id:'6-4-2', text:'追踪流程：每日名单→专业人员个案追踪→查看对话历史→评估风险→决定干预方式', must: true },
+            { id:'6-4-3', text:'干预方式：主动关怀消息/推送专业咨询资源/极端情况联系紧急联系人', must: true },
+            { id:'6-4-4', text:'输出：高风险用户追踪机制文档', must: true },
+          ]
+        },
+        {
+          title: '👤 人工干预流程',
+          tasks: [
+            { id:'6-4-5', text:'触发条件：Level3→自动触发/Level2连续2次无改善→人工介入/用户主动请求→转人工', must: true },
+            { id:'6-4-6', text:'人工介入方式：AI关怀模式/推送人工服务入口/主动外呼（仅Level3极端，需授权）', must: true },
+            { id:'6-4-7', text:'人工响应时效：Level3→30分钟内/Level2→4小时内/Level1+主动请求→24小时内', must: true },
+            { id:'6-4-8', text:'人工干预记录：存档+用户感知+不骚扰原则', must: true },
+            { id:'6-4-9', text:'输出：人工干预流程SOP文档', later: true },
+          ]
+        }
+      ]
+    },
+    {
+      id: '6-5', title: '6.5 商业化运营', must: 4, later: 3, optional: 0, color: '#6B9E8B',
+      sections: [
+        {
+          title: '💰 付费模式设计',
+          tasks: [
+            { id:'6-5-1', text:'Phase1（0-6月）：免费养口碑→目标留存率', must: true },
+            { id:'6-5-2', text:'Phase2（6-12月）：月卡¥15-22含无限对话+来信+快照卡 / 年卡¥120-180（8折）', must: true },
+            { id:'6-5-3', text:'Phase3（12月+）：人工咨询服务入口（¥50-100/次）+企业版B端订阅+IP联名周边', must: true },
+            { id:'6-5-4', text:'输出：付费模式设计方案', must: true },
+          ]
+        },
+        {
+          title: '📈 ARPU优化策略',
+          tasks: [
+            { id:'6-5-5', text:'提升付费率：免费用户留存后自然转化+限时优惠+口碑转化', must: true },
+            { id:'6-5-6', text:'提升付费用户消费：年卡折扣+增值服务+家庭计划', must: true },
+            { id:'6-5-7', text:'成本控制：缓存高频回复+对话长度限制+模型路由', must: true },
+            { id:'6-5-8', text:'输出：ARPU优化策略文档', later: true },
+          ]
+        }
+      ]
+    },
+  ]},
+
+  // 附录
+  { phase: 'A', phaseName: '附录', emoji: '📎', chapters: [
+    {
+      id: 'A-1', title: '附录A：角色版权说明', must: 2, later: 1, optional: 0, color: '#B8A88A',
+      sections: [
+        {
+          title: '⚠️ 版权风险提示',
+          tasks: [
+            { id:'A-1-1', text:'帕丁顿熊：STUDIO CANAL/惠康信托 ⚠️⚠️⚠️⚠️ 高风险——已有官方App，商业授权极严', must: true, risk: true },
+            { id:'A-1-2', text:'狐尼克：迪士尼 ⚠️⚠️⚠️⚠️⚠️ 极高风险——迪士尼全球维权，商用基本一告一个准', must: true, risk: true },
+            { id:'A-1-3', text:'屹耳：迪士尼（维尼系列）⚠️⚠️⚠️⚠️⚠️ 极高风险——同上', must: true, risk: true },
+            { id:'A-1-4', text:'⚠️ 风险承担：使用未授权IP进行商业运营的法律风险由运营方自行承担', must: true },
+            { id:'A-1-5', text:'低风险路径：角落生物（San-X授权）/ 原创插画（零风险可注册商标）/ 经典角色（民间故事）', must: true },
+            { id:'A-1-6', text:'输出：角色版权风险评估报告 + 替代方案推荐', later: true },
+          ]
+        }
+      ]
+    },
+    {
+      id: 'A-2', title: '附录B：求助资源清单', must: 4, later: 0, optional: 0, color: '#B8A88A',
+      sections: [
+        {
+          title: '📞 紧急求助资源',
+          tasks: [
+            { id:'A-2-1', text:'全国心理援助热线：400-161-9995（24小时，免费，专业的心理危机干预热线）', must: true },
+            { id:'A-2-2', text:'北京心理危机研究与干预中心：010-82951332（24小时，可转介至各地精神卫生机构）', must: true },
+            { id:'A-2-3', text:'希望24热线：400-161-9995（全国统一，覆盖全国的心理援助网络）', must: true },
+            { id:'A-2-4', text:'共青团心理热线：12355（青少年，针对青少年的心理支持）', must: true },
+            { id:'A-2-5', text:'各省市精神卫生中心：需查询当地号码', must: true },
+            { id:'A-2-6', text:'⚠️ 产品上线前请再次确认热线号码有效性', must: true },
+          ],
+          showAsSource: true, sources: [
+            { title:'北京心理危机研究与干预中心官网', url:'https://www.crisis.org.cn/lists/5.html' },
+            { title:'聚观点热线汇总', url:'https://my.juguandian.com:8080/books/eecca/page/35f4a' },
+          ]
+        }
+      ]
+    },
+    {
+      id: 'A-3', title: '附录C：信源列表', must: 5, later: 0, optional: 1, color: '#B8A88A',
+      sections: [
+        {
+          title: '📚 已标注信源（高可信度）',
+          tasks: [
+            { id:'A-3-1', text:'AI陪聊App ARPU $0.52→$1.18（2024→2025）来源：U深研报告', must: true },
+            { id:'A-3-2', text:'主流AI陪伴产品月均使用天数低于5天 来源：U深研+行业观察', must: true },
+            { id:'A-3-3', text:'AI陪伴五大致命问题 来源：53AI行业复盘+虎嗅赛道复盘', must: true },
+            { id:'A-3-4', text:'18-35岁情绪困扰人群3-5亿 来源：心理健康蓝皮书2023~2024', must: true },
+            { id:'A-3-5', text:'Replika Pro月付$19.99，年付$69.99 来源：eesel AI定价追踪', must: true },
+            { id:'A-3-6', text:'帕丁顿熊系列电影评分及票房 来源：豆瓣+TMDB', must: true },
+            { id:'A-3-7', text:'疯狂动物城豆瓣9.3分，全球票房10.25亿美元 来源：豆瓣+TMDB', must: true },
+          ],
+          showAsSource: true, sources: [
+            { title:'U深研《2025年AI陪伴类应用深度研究报告》', url:'https://unifuncs.com/s/4kpgQZET' },
+            { title:'微信公众号《年营收千万美金是最大谎言》', url:'https://mp.weixin.qq.com/s/0ec5tE0CofdC1cRJ8fvgjA' },
+            { title:'53AI《复盘 AI 陪伴消亡史》', url:'https://www.53ai.com/news/neirongchuangzuo/2025111767849.html' },
+            { title:'虎嗅《AI 陪伴赛道复盘》', url:'https://www.huxiu.com/article/4823315.html' },
+            { title:'心理健康蓝皮书 (2023~2024)', url:'https://news.qq.com/rain/a/20250429A02DWH00' },
+            { title:'eesel AI Replika定价追踪', url:'https://www.eesel.ai/en/blog/replika-ai-pricing' },
+            { title:'pricesgig Replika定价数据', url:'https://pricesgig.com/replika-ai-pricing-plans-2026/' },
+            { title:'App Store 林间聊愈室', url:'https://apps.apple.com/cn/app/%E6%9E%97%E9%97%B4%E8%81%8A%E6%84%88%E5%AE%A4-ai%E4%BC%99%E4%BC%B4%E6%87%82%E4%BD%A0%E6%83%85%E7%BB%AA-%E9%99%AA%E4%BD%A0%E6%88%90%E9%95%BF/id6453689112' },
+            { title:'豆瓣-帕丁顿熊', url:'https://movie.douban.com/subject/2998373/' },
+            { title:'豆瓣-帕丁顿熊2', url:'https://movie.douban.com/subject/26340419/' },
+            { title:'豆瓣-帕丁顿熊3', url:'https://movie.douban.com/subject/27115004/' },
+            { title:'豆瓣-疯狂动物城', url:'https://movie.douban.com/subject/25662329/' },
+            { title:'TMDB票房数据', url:'https://www.themoviedb.org/movie/269149-zootopia?language=zh' },
+            { title:'北京心理危机研究与干预中心', url:'https://www.crisis.org.cn/lists/5.html' },
+          ]
+        },
+        {
+          title: '⚠️ 未经溯源需注意的内容',
+          tasks: [
+            { id:'A-3-8', text:'竞争格局分析（"林间聊愈室记忆丢失严重，Replika中文体验差"）→ 建议结合实际用户反馈验证', must: true },
+            { id:'A-3-9', text:'角色分工矩阵星级评分 → 需通过用户测试验证', must: true },
+            { id:'A-3-10', text:'用户分层占比（60%/30%/10%）→ 需通过实际用户调研确认', must: true },
+            { id:'A-3-11', text:'留存率目标/对话质量合格线/安全识别率目标 → 建议结合自身产品数据调整', must: true },
+            { id:'A-3-12', text:'各阶段资源需求（工程师数量/时间估算）→ 需结合团队实际情况调整', must: true },
+          ]
+        },
+        {
+          title: '📋 数据准确性声明',
+          tasks: [
+            { id:'A-3-13', text:'App Store评分因地区/版本/时间不同可能存在差异，建议以实际查询为准', must: true },
+            { id:'A-3-14', text:'行业数据来自第三方报告，不同报告口径可能不同，数字仅供方向性参考', must: true },
+            { id:'A-3-15', text:'电影数据截至搜索日期（2026年4月），电影信息可能随时间更新', must: true },
+            { id:'A-3-16', text:'热线号码已通过官网核实，但热线运营状态可能变化，产品上线前请再次确认', must: true },
+          ]
+        }
+      ]
+    },
+  ]},
 ];
 
-/* ────────────────────────────────────────────
-   STATE MANAGEMENT
-   ──────────────────────────────────────────── */
-const STORAGE_KEY = 'forest_map_v2';
-let state = loadState();
+// ═══════════════════════════════════════════════════
+// State
+// ═══════════════════════════════════════════════════
+let state = JSON.parse(localStorage.getItem('wind-shelter-state') || '{}');
 let activeChapter = null;
 
-function loadState() { try { const s = localStorage.getItem(STORAGE_KEY); return s ? JSON.parse(s) : {}; } catch { return {}; } }
-function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+function getTaskState(id) { return !!state[id]; }
+function toggleTask(id) { state[id] = !state[id]; saveState(); updateAll(); }
 
-function getChapterDone(chId) {
-  const ch = chapters.find(c => c.id === chId);
-  if (!ch) return { done: 0, total: 0 };
-  const done = ch.tasks.filter(t => !!state[`${chId}_${t}`]).length;
-  return { done, total: ch.tasks.length };
+function saveState() {
+  localStorage.setItem('wind-shelter-state', JSON.stringify(state));
 }
 
-function getTotal() {
+function countTasks() {
+  let total = 0, done = 0;
+  CHAPTERS.forEach(p => p.chapters.forEach(c => c.sections.forEach(s => {
+    s.tasks.forEach(t => { total++; if (getTaskState(t.id)) done++; });
+  })));
+  return { total, done };
+}
+
+function chapterDoneCount(chapter) {
   let done = 0, total = 0;
-  chapters.forEach(ch => ch.tasks.forEach(t => { total++; if (state[`${ch.id}_${t}`]) done++; }));
+  chapter.sections.forEach(s => s.tasks.forEach(t => { total++; if (getTaskState(t.id)) done++; }));
   return { done, total };
 }
 
-function updateGlobalProgress() {
-  const { done, total } = getTotal();
-  const pct = total > 0 ? Math.round(done / total * 100) : 0;
-  document.getElementById('progressFill').style.width = pct + '%';
-  document.getElementById('progressPct').textContent = pct + '%';
+function updateHeader() {
+  const { total, done } = countTasks();
+  const pct = total ? Math.round(done / total * 100) : 0;
+  document.getElementById('totalBar').style.width = pct + '%';
+  document.getElementById('totalPct').textContent = pct + '%';
   document.getElementById('doneCount').textContent = done;
   document.getElementById('totalCount').textContent = total;
-  document.getElementById('footerFill').style.width = pct + '%';
-  document.getElementById('footerPct').textContent = pct + '%';
-  const wd = document.getElementById('welcomeDone');
-  const wt = document.getElementById('welcomeTotal');
-  const wp = document.getElementById('welcomePct');
-  if (wd) wd.textContent = done;
-  if (wt) wt.textContent = total;
-  if (wp) wp.textContent = pct + '%';
+  let doneCh = 0;
+  CHAPTERS.forEach(p => p.chapters.forEach(c => {
+    const { done: d, total: t } = chapterDoneCount(c);
+    if (t > 0 && d === t) doneCh++;
+  }));
+  document.getElementById('doneChapters').textContent = doneCh;
 }
 
-/* ────────────────────────────────────────────
-   SIDEBAR RENDER
-   ──────────────────────────────────────────── */
-function renderSidebar() {
-  const nav = document.getElementById('sidebarNav');
-  nav.innerHTML = '';
-  chapters.forEach(ch => {
-    const { done, total } = getChapterDone(ch.id);
-    const allDone = done === total && total > 0;
+function updateSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const phaseColors = { 1:'#D4956A', 2:'#7A9E6B', 3:'#6B8FB5', 4:'#9E7A6B', 5:'#8B7AA0', 6:'#6B9E8B', A:'#B8A88A' };
 
-    const chapterDiv = document.createElement('div');
-    chapterDiv.className = 'nav-chapter';
+  let html = `<div class="phase-legend" style="padding:8px 16px 4px;">
+    <div class="phase-dot"><span style="background:#D4956A"></span><span>立项</span></div>
+    <div class="phase-dot"><span style="background:#7A9E6B"></span><span>产品</span></div>
+    <div class="phase-dot"><span style="background:#6B8FB5"></span><span>技术</span></div>
+    <div class="phase-dot"><span style="background:#9E7A6B"></span><span>测试</span></div>
+    <div class="phase-dot"><span style="background:#8B7AA0"></span><span>上线</span></div>
+    <div class="phase-dot"><span style="background:#6B9E8B"></span><span>运营</span></div>
+  </div>`;
 
-    const btn = document.createElement('button');
-    btn.className = 'nav-chapter-btn' + (activeChapter === ch.id ? ' active expanded' : '');
-    btn.dataset.id = ch.id;
-    btn.innerHTML = `
-      <span class="chapter-icon">${ch.emoji}</span>
-      <span class="chapter-title">${ch.title}</span>
-      <span class="chapter-num">${ch.id < 10 ? '0'+ch.id : ch.id}</span>
-      <span class="chapter-status${allDone ? ' done' : ''}">${done}/${total}</span>
-      <span class="expand-icon">›</span>
-    `;
-
-    btn.addEventListener('click', () => {
-      const isExpanded = btn.classList.contains('expanded');
-      if (isExpanded) {
-        btn.classList.remove('expanded');
-        tasksDiv.classList.remove('open');
-        activeChapter = null;
-        renderSidebar();
-        showWelcome();
-      } else {
-        // collapse others
-        document.querySelectorAll('.nav-chapter-btn.expanded').forEach(b => {
-          b.classList.remove('expanded');
-          const sib = b.nextElementSibling;
-          if (sib) sib.classList.remove('open');
-        });
-        btn.classList.add('expanded');
-        tasksDiv.classList.add('open');
-        activeChapter = ch.id;
-        renderSidebar();
-        showChapter(ch.id);
-      }
-    });
-
-    const tasksDiv = document.createElement('div');
-    tasksDiv.className = 'nav-tasks' + (activeChapter === ch.id ? ' open' : '');
-
-    ch.tasks.forEach(task => {
-      const key = `${ch.id}_${task}`;
-      const done = !!state[key];
-      const taskEl = document.createElement('div');
-      taskEl.className = 'nav-task' + (done ? ' done' : '');
-      taskEl.innerHTML = `<div class="nav-task-cb"></div><div class="nav-task-text">${task}</div>`;
-      taskEl.addEventListener('click', e => {
-        e.stopPropagation();
-        state[key] = !state[key];
-        saveState();
-        renderSidebar();
-        if (activeChapter === ch.id) renderChapterContent(ch.id);
-        updateGlobalProgress();
-      });
-      tasksDiv.appendChild(taskEl);
-    });
-
-    chapterDiv.appendChild(btn);
-    chapterDiv.appendChild(tasksDiv);
-    nav.appendChild(chapterDiv);
-  });
-}
-
-/* ────────────────────────────────────────────
-   CHAPTER CONTENT
-   ──────────────────────────────────────────── */
-function showWelcome() {
-  document.getElementById('welcome').style.display = 'flex';
-  document.getElementById('chapterContent').style.display = 'none';
-  document.getElementById('contentFooter').style.display = 'none';
-  document.getElementById('breadcrumb').textContent = '';
-  updateGlobalProgress();
-}
-
-function showChapter(chId) {
-  document.getElementById('welcome').style.display = 'none';
-  document.getElementById('chapterContent').style.display = 'block';
-  document.getElementById('contentFooter').style.display = 'flex';
-  const ch = chapters.find(c => c.id === chId);
-  document.getElementById('breadcrumb').textContent = `第${chId < 10 ? '0'+chId : chId}章 · ${ch?.title || ''}`;
-  renderChapterContent(chId);
-}
-
-function renderChapterContent(chId) {
-  const ch = chapters.find(c => c.id === chId);
-  if (!ch) return;
-  const { done, total } = getChapterDone(chId);
-  const pct = total > 0 ? Math.round(done / total * 100) : 0;
-
-  const tasksHTML = ch.tasks.map((task, idx) => {
-    const key = `${chId}_${task}`;
-    const checked = !!state[key];
-    return `
-      <div class="task-card${checked ? ' checked' : ''}" data-key="${key}">
-        <div class="task-card-cb">
-          <svg viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1"/></svg>
-        </div>
-        <div class="task-card-body">
-          <div class="task-card-title">${task}</div>
-        </div>
-        <div class="task-card-index">${chId}.${idx + 1}</div>
+  CHAPTERS.forEach(phase => {
+    const pColor = phaseColors[phase.phase] || '#888';
+    html += `<div class="sidebar-phase" style="color:${pColor}">${phase.emoji} ${phase.phaseName}</div>`;
+    phase.chapters.forEach(ch => {
+      const { done, total } = chapterDoneCount(ch);
+      const pct = total ? Math.round(done / total * 100) : 0;
+      const isActive = activeChapter === ch.id;
+      const dotClass = done === total && total > 0 ? 'done' : (done > 0 ? 'active' : '');
+      const checkmark = done === total && total > 0 ? '✓' : (done > 0 ? '◐' : '');
+      html += `<div class="sidebar-item${isActive ? ' active' : ''}" onclick="renderChapter('${ch.id}')">
+        <div class="si-dot${dotClass ? ' ' + dotClass : ''}"></div>
+        <span class="si-num">${ch.id}</span>
+        <span class="si-text">${ch.title}</span>
+        <span class="si-check">${checkmark}</span>
       </div>`;
-  }).join('');
-
-  document.getElementById('chapterContent').innerHTML = `
-    <div class="chapter-hero">
-      <div class="chapter-eyebrow">Chapter ${chId < 10 ? '0'+chId : chId}</div>
-      <div class="chapter-heading">${ch.emoji} ${ch.title}</div>
-      <div class="chapter-subheading">${ch.tasks.length}个执行节点 · 全部内容见下方</div>
-      <div class="chapter-progress-strip">
-        <div class="strip-label">本章进度</div>
-        <div class="strip-track"><div class="strip-fill" style="width:${pct}%"></div></div>
-        <div class="strip-num">${done}/${total}</div>
-      </div>
-    </div>
-    ${ch.content}
-    <div class="section-block">
-      <div class="section-label">执行节点 · ${total}项</div>
-      <div class="tasks-grid">${tasksHTML}</div>
-    </div>`;
-
-  document.querySelectorAll('.task-card').forEach(el => {
-    el.addEventListener('click', () => {
-      const key = el.dataset.key;
-      state[key] = !state[key];
-      saveState();
-      renderChapterContent(chId);
-      renderSidebar();
-      updateGlobalProgress();
     });
+  });
+  sidebar.innerHTML = html;
+}
+
+function renderChapter(id) {
+  activeChapter = id;
+  let chapter = null, phase = null;
+  for (const p of CHAPTERS) {
+    const found = p.chapters.find(c => c.id === id);
+    if (found) { chapter = found; phase = p; break; }
+  }
+  if (!chapter) return;
+
+  const { done, total } = chapterDoneCount(chapter);
+  const pct = total ? Math.round(done / total * 100) : 0;
+  const barColor = { 1:'#D4956A', 2:'#7A9E6B', 3:'#6B8FB5', 4:'#9E7A6B', 5:'#8B7AA0', 6:'#6B9E8B', A:'#B8A88A' }[phase.phase] || '#888';
+  const phaseNum = { 1:'第一阶段', 2:'第二阶段', 3:'第三阶段', 4:'第四阶段', 5:'第五阶段', 6:'第六阶段', A:'附录' }[phase.phase] || '';
+
+  document.getElementById('emptyState').style.display = 'none';
+  const content = document.getElementById('chapterContent');
+  content.style.display = 'block';
+
+  let html = `<div class="fade-in">`;
+
+  // Hero
+  html += `<div class="chapter-hero phase${phase.phase}">
+    <div class="chapter-num">${phaseNum} · ${chapter.id}</div>
+    <div class="chapter-title">${chapter.title}</div>
+    <div class="chapter-meta">
+      <span>📋 ${chapter.sections.length} 个子模块</span>
+      <span>✅ ${done}/${total} 节点已完成</span>
+    </div>
+    <div class="chapter-progress">
+      <div class="chapter-progress-bar"><div class="chapter-progress-fill" style="width:${pct}%;background:${barColor}"></div></div>
+      <span class="chapter-progress-pct" style="color:${barColor}">${pct}%</span>
+    </div>
+  </div>`;
+
+  // Sections
+  chapter.sections.forEach((sec, si) => {
+    const secDone = sec.tasks.filter(t => getTaskState(t.id)).length;
+    const secTotal = sec.tasks.length;
+    const secPct = secTotal ? Math.round(secDone / secTotal * 100) : 0;
+    const badgeClass = secDone === secTotal && secTotal > 0 ? 'done' : '';
+    const badgeText = secDone === secTotal && secTotal > 0 ? '已完成' : `${secDone}/${secTotal}`;
+
+    html += `<div class="section-card">
+      <div class="section-header" onclick="toggleSection(this)">
+        <span class="section-toggle">▶</span>
+        <span class="section-title">${sec.title}</span>
+        <span class="section-badge ${badgeClass}">${badgeText}</span>
+      </div>
+      <div class="section-body open">
+        <div class="section-intro">`;
+
+    // If source section
+    if (sec.showAsSource && sec.sources) {
+      html += `<p style="font-size:12px;color:var(--text-light);margin-bottom:10px;">点击以下链接可查看原始来源：</p>`;
+      sec.sources.forEach(src => {
+        if (src.url) {
+          html += `<div style="margin-bottom:6px;">
+            <a class="src" href="${src.url}" target="_blank" rel="noopener">🔗 ${src.title}</a>
+          </div>`;
+        } else {
+          html += `<div style="margin-bottom:6px;font-size:12px;color:var(--text2);">${src.title}</div>`;
+        }
+      });
+    } else {
+      sec.tasks.forEach(task => {
+        const done = getTaskState(task.id);
+        const tag = task.risk
+          ? '<span class="task-tag risk">⚠️风险</span>'
+          : (task.must
+              ? '<span class="task-tag must">必须</span>'
+              : (task.later ? '<span class="task-tag later">后续</span>' : '<span class="task-tag optional">可选</span>'));
+        html += `<div class="task-item${done ? ' done' : ''}" onclick="event.stopPropagation();toggleTask('${task.id}')">
+          <div class="task-checkbox">${done ? '✓' : ''}</div>
+          <div class="task-content">
+            <div class="task-label">${task.text}</div>
+            ${tag}
+          </div>
+        </div>`;
+      });
+    }
+
+    html += `</div></div></div>`;
+  });
+
+  html += `</div>`;
+  content.innerHTML = html;
+  updateSidebar();
+  updateHeader();
+  window.mainContent.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function toggleSection(header) {
+  header.classList.toggle('open');
+  header.nextElementSibling.classList.toggle('open');
+  const toggle = header.querySelector('.section-toggle');
+  toggle.textContent = header.classList.contains('open') ? '▼' : '▶';
+}
+
+function updateAll() {
+  updateHeader();
+  updateSidebar();
+  if (activeChapter) renderChapter(activeChapter);
+}
+
+function exportProgress() {
+  const { total, done } = countTasks();
+  const pct = total ? Math.round(done / total * 100) : 0;
+  const lines = ['林间聊愈室·全链路产品卡点地图 执行进度'];
+  lines.push(`总体进度：${done}/${total} (${pct}%)`);
+  lines.push('');
+  CHAPTERS.forEach(phase => {
+    lines.push(`${phase.emoji} ${phase.phaseName}`);
+    phase.chapters.forEach(ch => {
+      const { done: d, total: t } = chapterDoneCount(ch);
+      lines.push(`  ${ch.id} ${ch.title}: ${d}/${t}`);
+    });
+    lines.push('');
+  });
+  const blob = new Blob([lines.join('\n')], { type: 'text/plain' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = '风筑小屋_执行进度.txt'; a.click();
+}
+
+function resetProgress() {
+  if (confirm('确定重置所有进度吗？此操作不可撤销。')) {
+    state = {};
+    saveState();
+    updateAll();
+  }
+}
+
+function openSourceModal(url) {
+  const modal = document.getElementById('sourceModal');
+  document.getElementById('modalContent').innerHTML = `<p>正在加载...</p>`;
+  modal.classList.add('show');
+  fetch(url).then(r => r.text()).then(html => {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    const title = doc.querySelector('title')?.textContent || url;
+    document.getElementById('modalContent').innerHTML = `<p><strong>页面标题：</strong>${title}</p><p><a href="${url}" target="_blank">在新窗口打开 →</a></p>`;
+  }).catch(() => {
+    document.getElementById('modalContent').innerHTML = `<p>无法加载页面内容。</p><p><a href="${url}" target="_blank">在新窗口打开 →</a></p>`;
   });
 }
 
-/* ────────────────────────────────────────────
-   UTILITIES
-   ──────────────────────────────────────────── */
-function resetAll() {
-  if (!confirm('确定重置所有进度？此操作不可撤销。')) return;
-  state = {};
-  saveState();
-  activeChapter = null;
-  renderSidebar();
-  updateGlobalProgress();
-  showWelcome();
+function closeSourceModal() {
+  document.getElementById('sourceModal').classList.remove('show');
 }
 
-function exportData() {
-  const { done, total } = getTotal();
-  const data = {
-    exported_at: new Date().toISOString(),
-    project: '林间聊愈室 · 全链路产品卡点地图 v3.1',
-    progress: { done, total, pct: total > 0 ? Math.round(done / total * 100) : 0 },
-    chapters: chapters.map(ch => ({
-      id: ch.id, title: ch.title,
-      tasks: ch.tasks.map(t => ({ task: t, done: !!state[`${ch.id}_${t}`] }))
-    }))
-  };
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = '林间聊愈室_执行进度_' + new Date().toISOString().slice(0,10) + '.json';
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
-
-/* ────────────────────────────────────────────
-   INIT
-   ──────────────────────────────────────────── */
-renderSidebar();
-updateGlobalProgress();
+// Init
+updateAll();
 </script>
 </body>
 </html>
