@@ -270,8 +270,14 @@
     }
 
     /* Source modal link highlight */
-    a.src { color: var(--accent); text-decoration: none; border-bottom: 1px dashed var(--accent); cursor: pointer; font-size: 12px; }
-    a.src:hover { border-bottom-style: solid; }
+    a.src {
+      color: var(--accent); text-decoration: none; cursor: pointer;
+      font-size: 13px; display: inline-flex; align-items: center; gap: 5px;
+      padding: 6px 12px; border-radius: 8px; border: 1px solid #c8dfb8;
+      background: #f0f7ec; transition: all .2s; font-weight: 500;
+    }
+    a.src:hover { background: #dff0d5; border-color: var(--accent); transform: translateY(-1px); box-shadow: 0 2px 8px rgba(122,158,107,.2); }
+    a.src::before { content: '🔗'; }
 
     /* Slide transition */
     .fade-in { animation: fadeIn .3s ease; }
@@ -1657,11 +1663,11 @@ function renderChapter(id) {
 
     // If source section
     if (sec.showAsSource && sec.sources) {
-      html += `<p style="font-size:12px;color:var(--text-light);margin-bottom:10px;">点击以下链接可查看原始来源：</p>`;
+      html += `<p style="font-size:12px;color:var(--text-light);margin-bottom:10px;">📎 点击以下信源链接可跳转到原始来源：</p>`;
       sec.sources.forEach(src => {
         if (src.url) {
-          html += `<div style="margin-bottom:6px;">
-            <a class="src" href="${src.url}" target="_blank" rel="noopener">🔗 ${src.title}</a>
+          html += `<div style="margin-bottom:8px;">
+            <a class="src" href="${src.url}" target="_blank" rel="noopener">${src.title}</a>
           </div>`;
         } else {
           html += `<div style="margin-bottom:6px;font-size:12px;color:var(--text2);">${src.title}</div>`;
