@@ -1,0 +1,3192 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>林间聊愈室 · 全链路产品卡点地图 v4.1（情绪设计框架版）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&family=Noto+Serif+SC:wght@400;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ─── Apple-Inspired Design Tokens ─── */
+:root {
+  /* Core Palette - Apple-inspired dark theme */
+  --bg-base: #000000;
+  --bg-surface: #1d1d1f;
+  --bg-elevated: #2a2a2c;
+  --bg-card: #272729;
+  --bg-card-hover: #3a3a3c;
+  
+  /* Border System - Minimal */
+  --border-subtle: rgba(255,255,255,0.06);
+  --border-default: rgba(255,255,255,0.12);
+  --border-strong: rgba(255,255,255,0.2);
+  
+  /* Text Hierarchy - Apple-style */
+  --text-primary: #f5f5f7;
+  --text-secondary: rgba(255,255,255,0.72);
+  --text-tertiary: rgba(255,255,255,0.48);
+  
+  /* Accent - Apple Blue */
+  --accent-blue: #2997ff;
+  --accent-blue-dim: rgba(41,151,255,0.15);
+  --accent-blue-glow: rgba(41,151,255,0.3);
+  
+  /* Emotional Colors */
+  --accent-green: #30d158;
+  --accent-green-dim: rgba(48,209,88,0.15);
+  --accent-amber: #ff9f0a;
+  --accent-amber-dim: rgba(255,159,10,0.15);
+  --accent-rose: #ff375f;
+  --accent-rose-dim: rgba(255,55,95,0.15);
+  --accent-purple: #bf5af2;
+  --accent-purple-dim: rgba(191,90,242,0.15);
+  
+  /* Typography - Apple SF Pro inspired */
+  --font-sans: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+  --font-serif: 'Noto Serif SC', Georgia, serif;
+  --font-mono: 'DM Mono', 'SF Mono', monospace;
+  
+  /* Spacing - Generous like Apple */
+  --sidebar-w: 260px;
+  --header-h: 56px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --radius-pill: 980px;
+  
+  /* Transitions */
+  --transition: 0.2s cubic-bezier(0.4,0,0.2,1);
+  --transition-slow: 0.35s cubic-bezier(0.4,0,0.2,1);
+  
+  /* Shadows - Apple style, minimal use */
+  --shadow-card: 0 4px 24px rgba(0,0,0,0.24);
+  --shadow-glass: rgba(0,0,0,0.8);
+}
+
+/* ─── Reset & Base ─── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { font-size: 16px; scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-sans);
+  background: var(--bg-base);
+  color: var(--text-primary);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* ─── Scrollbar - Apple style ─── */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.16); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.24); }
+
+/* ─── Selection ─── */
+::selection { background: var(--accent-blue-dim); color: var(--accent-blue); }
+
+/* ─── Layout ─── */
+.layout { display: flex; min-height: 100vh; }
+
+/* ─── Sidebar ─── */
+.sidebar {
+  position: fixed;
+  top: 0; left: 0;
+  width: var(--sidebar-w);
+  height: 100vh;
+  background: var(--bg-surface);
+  border-right: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+  transition: transform var(--transition);
+}
+.sidebar-header {
+  padding: 28px 20px 20px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+}
+.sidebar-logo-icon {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, var(--accent-green), #1a8a4c);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.sidebar-logo-text {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+.sidebar-logo-sub {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  font-weight: 400;
+}
+.sidebar-version {
+  margin-top: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--accent-green);
+  background: var(--accent-green-dim);
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+}
+
+.sidebar-nav {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 0;
+}
+.nav-section { margin-bottom: 8px; }
+.nav-section-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-tertiary);
+  padding: 16px 20px 8px;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition);
+  border-left: 2px solid transparent;
+  text-decoration: none;
+}
+.nav-item:hover {
+  color: var(--text-primary);
+  background: rgba(255,255,255,0.04);
+}
+.nav-item.active {
+  color: var(--accent-blue);
+  background: var(--accent-blue-dim);
+  border-left-color: var(--accent-blue);
+  font-weight: 500;
+}
+.nav-item-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--text-tertiary);
+  flex-shrink: 0;
+}
+.nav-item.active .nav-item-dot { background: var(--accent-blue); }
+.nav-item-sub { font-size: 11px; color: var(--text-tertiary); margin-left: auto; }
+
+.sidebar-footer {
+  padding: 20px;
+  border-top: 1px solid var(--border-subtle);
+  font-size: 11px;
+  color: var(--text-tertiary);
+  line-height: 1.6;
+}
+
+/* ─── Main Content ─── */
+.main {
+  margin-left: var(--sidebar-w);
+  flex: 1;
+  min-width: 0;
+}
+
+/* ─── Topbar - Apple Glass Effect ─── */
+.topbar {
+  position: sticky;
+  top: 0;
+  height: var(--header-h);
+  background: rgba(0,0,0,0.72);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  padding: 0 40px;
+  z-index: 50;
+}
+.topbar-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  flex: 1;
+  letter-spacing: -0.01em;
+}
+.topbar-actions { display: flex; align-items: center; gap: 12px; }
+.topbar-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--accent-green);
+  background: var(--accent-green-dim);
+  padding: 5px 12px;
+  border-radius: var(--radius-pill);
+}
+.topbar-badge::before {
+  content: '';
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--accent-green);
+  animation: pulse-dot 2s infinite;
+}
+@keyframes pulse-dot {
+  0%,100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* ─── Content Area - Generous Spacing ─── */
+.content {
+  padding: 64px 56px 120px;
+  max-width: 1100px;
+}
+
+/* ─── Hero Section ─── */
+.hero {
+  margin-bottom: 80px;
+  padding: 80px 0 64px;
+  position: relative;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -56px; right: -56px;
+  height: 480px;
+  background: radial-gradient(ellipse at 30% 50%, rgba(48,209,88,0.06) 0%, transparent 60%);
+  pointer-events: none;
+}
+.hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--accent-green);
+  background: var(--accent-green-dim);
+  border: 1px solid rgba(48,209,88,0.2);
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  margin-bottom: 28px;
+}
+.hero h1 {
+  font-family: var(--font-serif);
+  font-size: clamp(44px, 5vw, 72px);
+  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+  color: var(--text-primary);
+  margin-bottom: 20px;
+}
+.hero h1 span { color: var(--accent-green); }
+.hero-desc {
+  font-size: 19px;
+  color: var(--text-secondary);
+  line-height: 1.65;
+  max-width: 680px;
+  margin-bottom: 48px;
+  letter-spacing: -0.01em;
+}
+.hero-meta {
+  display: flex;
+  gap: 40px;
+  flex-wrap: wrap;
+  margin-bottom: 48px;
+}
+.hero-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.hero-meta-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-tertiary);
+}
+.hero-meta-value {
+  font-size: 14px;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+.hero-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+.hero-stat {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  transition: all var(--transition);
+}
+.hero-stat:hover {
+  border-color: var(--border-default);
+  background: var(--bg-card-hover);
+}
+.hero-stat-num {
+  font-family: var(--font-mono);
+  font-size: 42px;
+  font-weight: 500;
+  color: var(--accent-green);
+  line-height: 1;
+  margin-bottom: 10px;
+}
+.hero-stat-label {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* ─── Section ─── */
+.section {
+  margin-bottom: 96px;
+  scroll-margin-top: calc(var(--header-h) + 32px);
+}
+.section-header {
+  margin-bottom: 40px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.section-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--accent-blue);
+  margin-bottom: 12px;
+}
+.section-title {
+  font-family: var(--font-serif);
+  font-size: clamp(32px, 3vw, 44px);
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  margin-bottom: 14px;
+}
+.section-desc {
+  font-size: 17px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  max-width: 680px;
+  letter-spacing: -0.005em;
+}
+
+/* ─── Cards Grid - More Breathable ─── */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  transition: all var(--transition);
+  position: relative;
+}
+.card:hover {
+  border-color: var(--border-default);
+  background: var(--bg-card-hover);
+}
+.card-icon {
+  width: 44px; height: 44px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  font-size: 20px;
+}
+.card-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 10px;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+}
+.card-text {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.65;
+}
+.card-tag {
+  display: inline-block;
+  margin-top: 16px;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+}
+.card-tag.green { color: var(--accent-green); background: var(--accent-green-dim); }
+.card-tag.amber { color: var(--accent-amber); background: var(--accent-amber-dim); }
+.card-tag.rose { color: var(--accent-rose); background: var(--accent-rose-dim); }
+.card-tag.blue { color: var(--accent-blue); background: var(--accent-blue-dim); }
+.card-tag.purple { color: var(--accent-purple); background: var(--accent-purple-dim); }
+
+/* ─── Highlight Box - Apple Style ─── */
+.highlight-box {
+  background: linear-gradient(135deg, rgba(41,151,255,0.06), rgba(41,151,255,0.02));
+  border: 1px solid rgba(41,151,255,0.15);
+  border-radius: var(--radius-xl);
+  padding: 36px 40px;
+  margin: 32px 0;
+}
+.highlight-box-title {
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+  letter-spacing: -0.01em;
+}
+.highlight-box-text {
+  font-size: 16px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+.highlight-box-quote {
+  font-family: var(--font-serif);
+  font-size: 20px;
+  color: var(--text-primary);
+  line-height: 1.55;
+  font-style: italic;
+  padding-left: 20px;
+  border-left: 3px solid var(--accent-blue);
+}
+
+/* ─── Theory Card - Special Design ─── */
+.theory-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  padding: 32px 36px;
+  margin: 24px 0;
+}
+.theory-card-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.theory-card-icon {
+  width: 52px; height: 52px;
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+}
+.theory-card-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+.theory-card-subtitle {
+  font-size: 13px;
+  color: var(--text-tertiary);
+}
+.theory-card-content {
+  font-size: 15px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+.theory-card-content strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+/* ─── Three Levels Diagram - Apple's visual style ─── */
+.three-levels {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin: 32px 0;
+}
+.three-level-item {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  position: relative;
+  transition: all var(--transition);
+}
+.three-level-item:hover {
+  border-color: var(--border-default);
+}
+.three-level-item::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+.three-level-item.cognitive::before { background: var(--accent-blue); }
+.three-level-item.visceral::before { background: var(--accent-amber); }
+.three-level-item.reflective::before { background: var(--accent-purple); }
+
+.three-level-num {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 12px;
+}
+.three-level-item.cognitive .three-level-num { color: var(--accent-blue); }
+.three-level-item.visceral .three-level-num { color: var(--accent-amber); }
+.three-level-item.reflective .three-level-num { color: var(--accent-purple); }
+
+.three-level-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+.three-level-subtitle {
+  font-size: 13px;
+  color: var(--text-tertiary);
+  margin-bottom: 16px;
+}
+.three-level-desc {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+.three-level-examples {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-subtle);
+}
+.three-level-example {
+  font-size: 13px;
+  color: var(--text-tertiary);
+  margin-bottom: 8px;
+  padding-left: 12px;
+  border-left: 2px solid var(--border-default);
+}
+
+/* ─── Axis Diagram - Optimized spacing ─── */
+.axis-wrap {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+}
+.axis-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  padding: 32px;
+  position: relative;
+}
+.axis-card.anxiety::after {
+  background: radial-gradient(ellipse at top left, rgba(255,159,10,0.06), transparent 60%);
+}
+.axis-card.depression::after {
+  background: radial-gradient(ellipse at top left, rgba(255,55,95,0.06), transparent 60%);
+}
+.axis-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+.axis-icon {
+  width: 48px; height: 48px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+.axis-card.anxiety .axis-icon { background: var(--accent-amber-dim); }
+.axis-card.depression .axis-icon { background: var(--accent-rose-dim); }
+.axis-name {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+.axis-sub { font-size: 13px; color: var(--text-tertiary); margin-top: 2px; }
+.axis-levels { display: flex; flex-direction: column; gap: 14px; }
+.axis-level {
+  display: flex;
+  align-items: stretch;
+  gap: 16px;
+  padding: 18px;
+  background: var(--bg-surface);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  transition: all var(--transition);
+}
+.axis-level:hover { border-color: var(--border-default); }
+.axis-level-tag {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 5px 10px;
+  border-radius: var(--radius-sm);
+  height: fit-content;
+}
+.axis-card.anxiety .axis-level-tag { color: var(--accent-amber); background: var(--accent-amber-dim); }
+.axis-card.depression .axis-level-tag { color: var(--accent-rose); background: var(--accent-rose-dim); }
+.axis-level-content { flex: 1; min-width: 0; }
+.axis-level-words {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+.axis-level-quote {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  margin-bottom: 10px;
+  font-style: italic;
+}
+.axis-level-strategy {
+  font-size: 13px;
+  color: var(--text-secondary);
+  padding: 10px 14px;
+  background: var(--bg-card);
+  border-radius: var(--radius-sm);
+  border-left: 2px solid var(--border-default);
+  line-height: 1.5;
+}
+.axis-card.anxiety .axis-level-strategy { border-left-color: var(--accent-amber); }
+.axis-card.depression .axis-level-strategy { border-left-color: var(--accent-rose); }
+
+/* ─── Character Cards - More breathable ─── */
+.char-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+.char-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  padding: 32px;
+  transition: all var(--transition);
+  position: relative;
+}
+.char-card:hover {
+  border-color: var(--border-default);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-card);
+}
+.char-card-badge {
+  position: absolute;
+  top: 24px; right: 24px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+}
+.char-card.paddington .char-card-badge { color: var(--accent-amber); background: var(--accent-amber-dim); }
+.char-card.nick .char-card-badge { color: var(--accent-blue); background: var(--accent-blue-dim); }
+.char-card.eeyore .char-card-badge { color: var(--accent-rose); background: var(--accent-rose-dim); }
+.char-card-avatar {
+  width: 60px; height: 60px;
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  margin-bottom: 24px;
+}
+.char-card.paddington .char-card-avatar { background: linear-gradient(135deg, #5a3e2b, #8b6b4a); }
+.char-card.nick .char-card-avatar { background: linear-gradient(135deg, #2e4a3a, #4a7a5e); }
+.char-card.eeyore .char-card-avatar { background: linear-gradient(135deg, #3a3a4a, #5a5a7a); }
+.char-card-name {
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+  letter-spacing: -0.01em;
+}
+.char-card-source { font-size: 12px; color: var(--text-tertiary); margin-bottom: 20px; }
+.char-card-quote {
+  font-size: 15px;
+  color: var(--text-secondary);
+  font-style: italic;
+  line-height: 1.6;
+  margin-bottom: 24px;
+  padding-left: 16px;
+  border-left: 2px solid var(--border-default);
+}
+.char-card.paddington .char-card-quote { border-left-color: var(--accent-amber); }
+.char-card.nick .char-card-quote { border-left-color: var(--accent-blue); }
+.char-card.eeyore .char-card-quote { border-left-color: var(--accent-rose); }
+.char-card-traits { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+.char-trait {
+  font-size: 12px;
+  padding: 5px 12px;
+  background: var(--bg-surface);
+  border-radius: var(--radius-pill);
+  color: var(--text-tertiary);
+  border: 1px solid var(--border-subtle);
+}
+.char-card-dos { border-top: 1px solid var(--border-subtle); padding-top: 20px; }
+.char-card-dos-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent-green);
+  margin-bottom: 12px;
+}
+.char-card-do {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+.char-card-do::before { content: '✓'; color: var(--accent-green); flex-shrink: 0; }
+.char-card-donts-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent-rose);
+  margin-bottom: 12px;
+  margin-top: 16px;
+}
+.char-card-dont {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--text-tertiary);
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+.char-card-dont::before { content: '✗'; color: var(--accent-rose); flex-shrink: 0; }
+
+/* ─── Tables - Apple style ─── */
+.table-wrap {
+  overflow-x: auto;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+thead { background: var(--bg-elevated); }
+th {
+  padding: 16px 20px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-size: 12px;
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+}
+td {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  line-height: 1.55;
+}
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(255,255,255,0.02); }
+.td-primary { color: var(--text-primary) !important; font-weight: 500; }
+
+/* ─── Accordion - Apple style ─── */
+.accordion { display: flex; flex-direction: column; gap: 10px; }
+.accordion-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: all var(--transition);
+}
+.accordion-item:has(.accordion-body:not(.collapsed)) { border-color: var(--border-default); }
+.accordion-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 20px 24px;
+  cursor: pointer;
+  user-select: none;
+  transition: background var(--transition);
+}
+.accordion-header:hover { background: rgba(255,255,255,0.02); }
+.accordion-icon {
+  width: 32px; height: 32px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+.accordion-title {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+.accordion-sub { font-size: 12px; color: var(--text-tertiary); }
+.accordion-chevron {
+  color: var(--text-tertiary);
+  transition: transform var(--transition);
+  font-size: 14px;
+}
+.accordion-item:has(.accordion-body:not(.collapsed)) .accordion-chevron { transform: rotate(180deg); }
+.accordion-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height var(--transition-slow);
+}
+.accordion-body:not(.collapsed) { max-height: 3000px; }
+.accordion-content {
+  padding: 0 24px 24px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+/* ─── Phase Timeline ─── */
+.phase-timeline {
+  position: relative;
+  padding-left: 36px;
+}
+.phase-timeline::before {
+  content: '';
+  position: absolute;
+  left: 13px; top: 8px; bottom: 8px;
+  width: 2px;
+  background: var(--border-default);
+}
+.phase-item {
+  position: relative;
+  margin-bottom: 32px;
+}
+.phase-item::before {
+  content: '';
+  position: absolute;
+  left: -29px; top: 8px;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 2px solid var(--accent-blue);
+  z-index: 1;
+}
+.phase-item-badge {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--accent-blue);
+  background: var(--accent-blue-dim);
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  margin-bottom: 10px;
+}
+.phase-item-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+.phase-item-desc {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* ─── Journey Flow - Apple style ─── */
+.journey-flow {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  overflow-x: auto;
+  padding: 24px 0;
+}
+.journey-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  min-width: 130px;
+  position: relative;
+}
+.journey-step-circle {
+  width: 60px; height: 60px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 2px solid var(--border-default);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  margin-bottom: 14px;
+  transition: all var(--transition);
+  z-index: 1;
+}
+.journey-step:hover .journey-step-circle {
+  border-color: var(--accent-blue);
+  background: var(--accent-blue-dim);
+  transform: scale(1.08);
+}
+.journey-step-num {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-tertiary);
+  margin-bottom: 6px;
+}
+.journey-step-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-align: center;
+  margin-bottom: 4px;
+}
+.journey-step-desc {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  text-align: center;
+  line-height: 1.5;
+}
+.journey-arrow {
+  flex-shrink: 0;
+  width: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-tertiary);
+  font-size: 20px;
+}
+
+/* ─── Strategy Cards ─── */
+.strategy-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.strategy-card-header {
+  padding: 22px 26px;
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.strategy-card-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.strategy-card-body { padding: 22px 26px; }
+.strategy-list { list-style: none; }
+.strategy-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 0;
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.55;
+}
+.strategy-list li::before {
+  content: '→';
+  color: var(--accent-blue);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* ─── Two/Three Column Layouts ─── */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+}
+.three-col {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+/* ─── Mini Cards - More breathable ─── */
+.mini-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+}
+.mini-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  transition: all var(--transition);
+}
+.mini-card:hover { border-color: var(--border-default); background: var(--bg-card); }
+.mini-card-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+.mini-card-desc {
+  font-size: 13px;
+  color: var(--text-tertiary);
+  line-height: 1.5;
+}
+
+/* ─── Module List ─── */
+.module-list { display: flex; flex-direction: column; gap: 10px; }
+.module-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 20px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  transition: all var(--transition);
+}
+.module-item:hover { border-color: var(--border-default); background: var(--bg-card); }
+.module-num {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--accent-blue);
+  background: var(--accent-blue-dim);
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+.module-info { flex: 1; min-width: 0; }
+.module-name { font-size: 15px; font-weight: 500; color: var(--text-primary); margin-bottom: 4px; }
+.module-desc { font-size: 13px; color: var(--text-tertiary); }
+
+/* ─── Safe Levels - Optimized spacing ─── */
+.safe-levels { display: flex; flex-direction: column; gap: 16px; }
+.safe-level {
+  border-radius: var(--radius-lg);
+  padding: 24px 28px;
+  border: 1px solid;
+}
+.safe-level-1 { background: rgba(255,159,10,0.06); border-color: rgba(255,159,10,0.2); }
+.safe-level-2 { background: rgba(255,55,95,0.06); border-color: rgba(255,55,95,0.2); }
+.safe-level-3 { background: rgba(191,90,242,0.06); border-color: rgba(191,90,242,0.2); }
+.safe-level-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.safe-level-badge {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+}
+.safe-level-1 .safe-level-badge { color: var(--accent-amber); background: rgba(255,159,10,0.15); }
+.safe-level-2 .safe-level-badge { color: var(--accent-rose); background: rgba(255,55,95,0.15); }
+.safe-level-3 .safe-level-badge { color: var(--accent-purple); background: rgba(191,90,242,0.15); }
+.safe-level-name { font-size: 15px; font-weight: 600; }
+.safe-level-1 .safe-level-name { color: var(--accent-amber); }
+.safe-level-2 .safe-level-name { color: var(--accent-rose); }
+.safe-level-3 .safe-level-name { color: var(--accent-purple); }
+.safe-level-content { display: flex; flex-direction: column; gap: 12px; }
+.safe-level-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+.safe-level-item-label {
+  font-weight: 600;
+  color: var(--text-primary);
+  flex-shrink: 0;
+  min-width: 80px;
+}
+
+/* ─── Priority Tags ─── */
+.priority-tag {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.priority-tag.p0 { color: #ff453a; background: rgba(255,69,58,0.12); }
+.priority-tag.p1 { color: var(--accent-amber); background: var(--accent-amber-dim); }
+.priority-tag.p2 { color: var(--accent-blue); background: var(--accent-blue-dim); }
+.priority-tag.p3 { color: var(--text-tertiary); background: rgba(255,255,255,0.05); }
+
+/* ─── Dialog Example ─── */
+.dialog-example {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+}
+.dialog-meta {
+  padding: 18px 26px;
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.dialog-char-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: var(--radius-pill);
+}
+.dialog-char-badge.paddington { color: var(--accent-amber); background: var(--accent-amber-dim); }
+.dialog-char-badge.nick { color: var(--accent-blue); background: var(--accent-blue-dim); }
+.dialog-char-badge.eeyore { color: var(--accent-rose); background: var(--accent-rose-dim); }
+.dialog-axis-tag {
+  font-size: 11px;
+  padding: 4px 10px;
+  background: rgba(255,255,255,0.05);
+  border-radius: var(--radius-pill);
+  color: var(--text-tertiary);
+}
+.dialog-node-tag {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  padding: 4px 10px;
+  background: rgba(255,255,255,0.05);
+  border-radius: var(--radius-pill);
+  color: var(--text-tertiary);
+}
+.dialog-bubbles { padding: 28px; display: flex; flex-direction: column; gap: 20px; }
+.dialog-bubble-row { display: flex; gap: 12px; }
+.dialog-bubble-avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+.dialog-bubble-avatar.user { background: var(--bg-elevated); color: var(--text-tertiary); }
+.dialog-bubble-avatar.bot { background: var(--bg-card); }
+.dialog-bubble { max-width: 82%; }
+.dialog-bubble.user { align-self: flex-end; }
+.dialog-bubble.bot { align-self: flex-start; }
+.dialog-bubble-text {
+  padding: 14px 18px;
+  border-radius: 18px;
+  font-size: 15px;
+  line-height: 1.55;
+}
+.dialog-bubble.user .dialog-bubble-text {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border-bottom-right-radius: 6px;
+}
+.dialog-bubble.bot .dialog-bubble-text {
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  border-bottom-left-radius: 6px;
+}
+.dialog-bubble-label {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  margin-top: 6px;
+  padding: 0 6px;
+}
+.dialog-bubble.user .dialog-bubble-label { text-align: right; }
+
+/* ─── Flow Chart - Apple style ─── */
+.flow-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+}
+.flow-row { display: flex; align-items: stretch; }
+.flow-cell {
+  padding: 16px 20px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-right: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
+}
+.flow-cell:last-child { border-right: none; }
+.flow-cell-label { font-weight: 600; color: var(--text-primary); min-width: 90px; }
+.flow-cell-value { color: var(--text-secondary); flex: 1; }
+.flow-cell.accent { background: var(--accent-blue-dim); }
+.flow-cell.accent .flow-cell-label { color: var(--accent-blue); }
+
+/* ─── Section Separator ─── */
+.section-sep {
+  height: 1px;
+  background: var(--border-subtle);
+  margin: 80px 0;
+}
+
+/* ─── Footer ─── */
+.doc-footer {
+  margin-top: 100px;
+  padding-top: 40px;
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+.doc-footer-info {
+  font-size: 14px;
+  color: var(--text-tertiary);
+  line-height: 1.6;
+}
+.doc-footer-version {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-tertiary);
+  background: var(--bg-surface);
+  padding: 10px 18px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-subtle);
+}
+
+/* ─── Reading Progress ─── */
+.reading-progress {
+  position: fixed;
+  top: 0; left: 0;
+  width: 0%;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent-blue), #5ac8fa);
+  z-index: 200;
+  transition: width 0.1s linear;
+}
+
+/* ─── Mobile Nav Toggle ─── */
+.nav-toggle {
+  display: none;
+  position: fixed;
+  top: 16px; left: 16px;
+  z-index: 200;
+  width: 44px; height: 44px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 18px;
+  color: var(--text-primary);
+}
+
+/* ─── Source Annotation - Apple style ─── */
+.src {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 11px;
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+  cursor: help;
+  vertical-align: middle;
+  margin-left: 3px;
+}
+.src::before { content: '['; }
+.src::after { content: ']'; }
+.src.unverified { color: var(--accent-amber); }
+.src.verified { color: var(--accent-green); }
+.src.gov { color: var(--accent-blue); }
+.src.weak { opacity: 0.6; }
+
+/* ─── Tooltip ─── */
+[data-tip] { position: relative; cursor: help; }
+[data-tip]::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  color: var(--text-secondary);
+  font-size: 12px;
+  padding: 8px 14px;
+  border-radius: var(--radius-md);
+  white-space: normal;
+  width: max-content;
+  max-width: 320px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--transition);
+  z-index: 999;
+  line-height: 1.5;
+  text-align: left;
+}
+[data-tip]:hover::after { opacity: 1; }
+
+/* ─── Animations ─── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-in { animation: fadeInUp 0.5s ease both; }
+.animate-in:nth-child(1) { animation-delay: 0.05s; }
+.animate-in:nth-child(2) { animation-delay: 0.1s; }
+.animate-in:nth-child(3) { animation-delay: 0.15s; }
+.animate-in:nth-child(4) { animation-delay: 0.2s; }
+
+/* ─── Mobile Responsive ─── */
+@media (max-width: 1100px) {
+  :root { --sidebar-w: 0px; }
+  .char-grid { grid-template-columns: 1fr; }
+  .axis-wrap { grid-template-columns: 1fr; }
+  .two-col { grid-template-columns: 1fr; }
+  .three-col { grid-template-columns: 1fr; }
+  .three-levels { grid-template-columns: 1fr; }
+  .hero-stats { grid-template-columns: 1fr; }
+  .nav-toggle { display: flex; }
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.open { transform: translateX(0); }
+  .content { padding: 48px 28px 100px; }
+}
+@media (max-width: 640px) {
+  .hero h1 { font-size: 36px; }
+  .hero-meta { flex-direction: column; gap: 20px; }
+  .topbar { padding: 0 16px; }
+  .content { padding: 40px 20px 80px; }
+  .cards-grid { grid-template-columns: 1fr; }
+}
+
+/* ─── Tooltip ─── */
+[data-tip] { position: relative; cursor: help; }
+[data-tip]::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  color: var(--text-secondary);
+  font-size: 11px;
+  padding: 5px 10px;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--transition);
+  z-index: 999;
+}
+[data-tip]:hover::after { opacity: 1; }
+</style>
+</head>
+<body>
+
+<div class="reading-progress" id="readingProgress"></div>
+<div class="nav-toggle" id="navToggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">☰</div>
+
+<div class="layout">
+
+<!-- ── Sidebar ── -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <a href="#" class="sidebar-logo">
+      <div class="sidebar-logo-icon">🌿</div>
+      <div>
+        <div class="sidebar-logo-text">林间聊愈室</div>
+        <div class="sidebar-logo-sub">全链路产品卡点地图</div>
+      </div>
+    </a>
+    <div class="sidebar-version">● v4.1 · 2026.04</div>
+  </div>
+
+  <div class="sidebar-nav">
+    <div class="nav-section">
+      <div class="nav-section-label">理论基础</div>
+      <a class="nav-item" data-section="s0-emotion-design" onclick="scrollToSection('s0-emotion-design')">
+        <span class="nav-item-dot"></span>情绪设计框架
+        <span class="nav-item-sub">0.1</span>
+      </a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">前期立项</div>
+      <a class="nav-item" data-section="s1-market" onclick="scrollToSection('s1-market')">
+        <span class="nav-item-dot"></span>市场调研
+        <span class="nav-item-sub">1.1</span>
+      </a>
+      <a class="nav-item" data-section="s1-compete" onclick="scrollToSection('s1-compete')">
+        <span class="nav-item-dot"></span>竞品分析
+        <span class="nav-item-sub">1.2</span>
+      </a>
+      <a class="nav-item" data-section="s1-position" onclick="scrollToSection('s1-position')">
+        <span class="nav-item-dot"></span>产品定位
+        <span class="nav-item-sub">1.3</span>
+      </a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">产品设计</div>
+      <a class="nav-item" data-section="s2-arch" onclick="scrollToSection('s2-arch')">
+        <span class="nav-item-dot"></span>功能架构
+        <span class="nav-item-sub">2.1</span>
+      </a>
+      <a class="nav-item" data-section="s2-emotion" onclick="scrollToSection('s2-emotion')">
+        <span class="nav-item-dot"></span>情绪框架
+        <span class="nav-item-sub">2.2</span>
+      </a>
+      <a class="nav-item" data-section="s2-characters" onclick="scrollToSection('s2-characters')">
+        <span class="nav-item-dot"></span>角色体系
+        <span class="nav-item-sub">2.3</span>
+      </a>
+      <a class="nav-item" data-section="s2-dialog" onclick="scrollToSection('s2-dialog')">
+        <span class="nav-item-dot"></span>对话策略
+        <span class="nav-item-sub">2.4</span>
+      </a>
+      <a class="nav-item" data-section="s2-memory" onclick="scrollToSection('s2-memory')">
+        <span class="nav-item-dot"></span>记忆系统
+        <span class="nav-item-sub">2.5</span>
+      </a>
+      <a class="nav-item" data-section="s2-safe" onclick="scrollToSection('s2-safe')">
+        <span class="nav-item-dot"></span>安全系统
+        <span class="nav-item-sub">2.6</span>
+      </a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">技术开发</div>
+      <a class="nav-item" data-section="s3-tech" onclick="scrollToSection('s3-tech')">
+        <span class="nav-item-dot"></span>技术架构
+        <span class="nav-item-sub">3.1</span>
+      </a>
+      <a class="nav-item" data-section="s3-engine" onclick="scrollToSection('s3-engine')">
+        <span class="nav-item-dot"></span>对话引擎
+        <span class="nav-item-sub">3.2</span>
+      </a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">测试发布</div>
+      <a class="nav-item" data-section="s4-test" onclick="scrollToSection('s4-test')">
+        <span class="nav-item-dot"></span>功能测试
+        <span class="nav-item-sub">4.1</span>
+      </a>
+      <a class="nav-item" data-section="s5-release" onclick="scrollToSection('s5-release')">
+        <span class="nav-item-dot"></span>发布计划
+        <span class="nav-item-sub">5.1</span>
+      </a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">运营维护</div>
+      <a class="nav-item" data-section="s6-ops" onclick="scrollToSection('s6-ops')">
+        <span class="nav-item-dot"></span>运营体系
+        <span class="nav-item-sub">6.1</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="sidebar-footer">
+    文档版本：v4.1<br>
+    更新：情绪设计框架 · Apple风格<br>
+    状态：完整版
+  </div>
+</nav>
+
+<!-- ── Main ── -->
+<main class="main">
+
+<div class="topbar">
+  <div class="topbar-title">林间聊愈室 · 全链路产品卡点地图</div>
+  <div class="topbar-actions">
+    <div class="topbar-badge">v4.1 · 2026</div>
+  </div>
+</div>
+
+<div class="content">
+
+<!-- ═══ HERO ═══ -->
+<div class="hero">
+  <div class="hero-eyebrow">🌿 全链路产品手册 · 完整版</div>
+  <h1>林间聊愈室<br><span>全链路产品卡点地图</span></h1>
+  <p class="hero-desc">以「情绪设计」为底层理论基础，覆盖从立项到运营维护的完整产品手册。包含六轴全情绪框架（负面四轴+正面三轴激活）、三角色人设体系与认知科学支撑。</p>
+  <div class="hero-meta">
+    <div class="hero-meta-item">
+      <div class="hero-meta-label">版本</div>
+      <div class="hero-meta-value">v4.1</div>
+    </div>
+    <div class="hero-meta-item">
+      <div class="hero-meta-label">核心理论</div>
+      <div class="hero-meta-value">情绪设计</div>
+    </div>
+    <div class="hero-meta-item">
+      <div class="hero-meta-label">角色数</div>
+      <div class="hero-meta-value">3个（帕丁顿熊/狐尼克/屹耳）</div>
+    </div>
+    <div class="hero-meta-item">
+      <div class="hero-meta-label">文档状态</div>
+      <div class="hero-meta-value">完整版</div>
+    </div>
+  </div>
+  <div class="hero-stats">
+    <div class="hero-stat">
+      <div class="hero-stat-num">7</div>
+      <div class="hero-stat-label">大阶段覆盖立项到运营维护全链路</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-num">3</div>
+      <div class="hero-stat-label">核心角色完整人设手册</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-num">6+2</div>
+      <div class="hero-stat-label">情绪轴：六轴全情绪 + 两层设计理论</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     SECTION 0: 情绪设计核心理论框架
+══════════════════════════════════════ -->
+<section class="section" id="s0-emotion-design">
+  <div class="section-header">
+    <div class="section-eyebrow">00 · 理论基础</div>
+    <div class="section-title">情绪设计核心理论框架</div>
+    <div class="section-desc">情绪设计（Emotional Design）是林间聊愈室的底层理论基础。由唐纳德·诺曼在同名著作中系统阐述，强调产品设计需同时满足认知、本能和反思三个层次的情感需求。<span class="src verified" data-tip="来源：Donald A. Norman, Emotional Design: Why We Love (or Hate) Everyday Things, Basic Books, 2004. 该书系统阐述了情感设计的三个层次理论，是该领域的奠基性著作。">✅Norman 2004</span></div>
+  </div>
+
+  <!-- Three Levels Theory - Apple Card Style -->
+  <div class="three-levels">
+    <div class="three-level-item cognitive">
+      <div class="three-level-num">Level 01</div>
+      <div class="three-level-title">本能层</div>
+      <div class="three-level-subtitle">Visceral Level</div>
+      <div class="three-level-desc">用户接触产品的第一印象——外观、触感、声音。当用户打开App，三只可爱的小动物形象立即触发积极的本能反应：温暖、安全、被接纳。</div>
+      <div class="three-level-examples">
+        <div class="three-level-example">"画风可爱，戳中了我"</div>
+        <div class="three-level-example">"第一眼就觉得很治愈"</div>
+      </div>
+    </div>
+    <div class="three-level-item visceral">
+      <div class="three-level-num">Level 02</div>
+      <div class="three-level-title">行为层</div>
+      <div class="three-level-subtitle">Behavioral Level</div>
+      <div class="three-level-desc">使用过程中的感受——功能是否好用、交互是否顺畅、对话是否自然。角色的克制语气让用户感到被尊重而非被评判。</div>
+      <div class="three-level-examples">
+        <div class="three-level-example">"不像客服，像朋友"</div>
+        <div class="three-level-example">"说话的方式让我很舒服"</div>
+      </div>
+    </div>
+    <div class="three-level-item reflective">
+      <div class="three-level-num">Level 03</div>
+      <div class="three-level-title">反思层</div>
+      <div class="three-level-subtitle">Reflective Level</div>
+      <div class="three-level-desc">使用后的思考与记忆——对产品的认同感、品牌印象、自我形象。"我使用林间聊愈室"成为用户自我认同的一部分。</div>
+      <div class="three-level-examples">
+        <div class="three-level-example">"它记得我说过的事"</div>
+        <div class="three-level-example">"这是我的专属陪伴"</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Emotional Design Core Principles -->
+  <div class="highlight-box">
+    <div class="highlight-box-title">情绪设计的三大核心原则</div>
+    <div class="section-desc" style="margin-top:16px;max-width:100%">
+      <strong style="color:var(--text-primary)">1. 情感共鸣优先于功能堆砌</strong><br>
+      林间聊愈室不追求功能数量，而是追求每一次对话的情感深度。研究表明，用户愿意为"被记住"的体验付费，而非功能列表。<span class="src verified" data-tip="参考：Replika用户调研显示'记忆功能'是用户留存的首要因素（Replika Blog, 2023）。">参考Replika调研</span>
+    </div>
+  </div>
+
+  <div class="cards-grid" style="margin-top:32px">
+    <div class="card">
+      <div class="card-icon" style="background:var(--accent-blue-dim)">🧠</div>
+      <div class="card-title">认知层：理解用户情绪</div>
+      <div class="card-text">
+        六轴情绪识别（焦虑/低落/愤怒/孤独 + 平静/连接）让AI能够准确理解用户的情绪状态。<strong style="color:var(--text-primary)">理解是共情的前提。</strong>
+      </div>
+      <span class="card-tag blue">认知科学</span>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:var(--accent-amber-dim)">💬</div>
+      <div class="card-title">情感层：角色语气设计</div>
+      <div class="card-text">
+        三种角色性格（温暖/克制/镜像）覆盖不同用户的情感需求。<strong style="color:var(--text-primary)">用户选择"更合"的那只，形成依恋。</strong>
+      </div>
+      <span class="card-tag amber">人设设计</span>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:var(--accent-purple-dim)">🔗</div>
+      <div class="card-title">关系层：记忆与连续性</div>
+      <div class="card-text">
+        跨对话记忆持久化让用户感受到<strong style="color:var(--text-primary)">"被记住"</strong>。研究表明，记忆连续性是AI陪伴产品留存的核心因素。<span class="src unverified" data-tip="该结论来自53AI行业复盘（53ai.com），引自独响创始人王登科的行业观察，缺乏原始实证研究支撑。">⚠行业观察</span>
+      </div>
+      <span class="card-tag purple">关系设计</span>
+    </div>
+  </div>
+
+  <!-- Scientific Foundation -->
+  <div class="theory-card" style="margin-top:40px">
+    <div class="theory-card-header">
+      <div class="theory-card-icon" style="background:var(--accent-green-dim)">📚</div>
+      <div>
+        <div class="theory-card-title">科学理论支撑</div>
+        <div class="theory-card-subtitle">情绪设计相关学术研究</div>
+      </div>
+    </div>
+    <div class="theory-card-content">
+      <p><strong>1. 具身认知理论（Embodied Cognition）</strong></p>
+      <p style="margin-top:8px;margin-bottom:16px">帕丁顿熊的"身体感知法"——焦虑时引导用户感受身体而非头脑思考——直接源于具身认知理论：心理体验与身体状态紧密相连。<span class="src verified" data-tip="参考：Barsalou, L.W. (2008). Grounded cognition. Annual Review of Psychology, 59, 617-645. 该文献是具身认知领域的核心综述论文。">✅Barsalou 2008</span></p>
+      
+      <p><strong>2. 正念减压理论（MBSR）</strong></p>
+      <p style="margin-top:8px;margin-bottom:16px">屹耳的"在场感"——不急于拉用户出情绪，而是陪伴——契合正念减压的核心原则：接纳当下，而非逃避或评判。<span class="src verified" data-tip="参考：Kabat-Zinn, J. (1990). Full Catastrophe Living. Delacorte Press. 正念减压疗法的奠基性著作，系统阐述了正念在压力管理中的应用。">✅Kabat-Zinn 1990</span></p>
+      
+      <p><strong>3. 依恋理论（Attachment Theory）</strong></p>
+      <p style="margin-top:8px;margin-bottom:16px">用户与AI角色的长期关系形成"依恋"。Bowlby的依恋理论为角色一致性设计提供了心理学基础：<strong style="color:var(--text-primary)">可预测性带来安全感。</strong><span class="src verified" data-tip="参考：Bowlby, J. (1969). Attachment and Loss: Vol. 1. Attachment. Basic Books. 依恋理论的奠基性著作。">✅Bowlby 1969</span></p>
+      
+      <p><strong>4. 认知行为疗法（CBT）原则</strong></p>
+      <p style="margin-top:8px">狐尼克的"轻轻拨开"——帮助用户看到思维的另一种可能——直接借鉴CBT的核心技术：识别和挑战非理性信念。<span class="src verified" data-tip="参考：Beck, J.S. (2011). Cognitive Behavioral Therapy: Basics and Beyond (2nd ed.). Guilford Press. CBT的经典教科书。">✅Beck 2011</span></p>
+    </div>
+  </div>
+
+  <!-- Application in Product -->
+  <div class="highlight-box" style="margin-top:40px">
+    <div class="highlight-box-title">情绪设计在林间聊愈室的应用</div>
+    <div class="highlight-box-quote" style="margin-top:20px">
+      "情绪设计不是'让产品更情感化'，而是让产品<strong style="color:var(--accent-blue)">在正确的时机、以正确的方式、触达正确的情感层次。</strong>"
+    </div>
+    <div class="section-desc" style="margin-top:24px;max-width:100%">
+      <p style="margin-bottom:16px"><strong style="color:var(--text-primary)">本能层应用：</strong>三只动物的角色视觉设计、温暖的配色体系、圆润的UI风格——让用户的第一眼就感到安全和被接纳。</p>
+      <p style="margin-bottom:16px"><strong style="color:var(--text-primary)">行为层应用：</strong>克制的对话语气（不说"我理解你的感受"）、微行动推荐（当下可做的最小动作）、角色一致性保证——让使用过程自然流畅。</p>
+      <p><strong style="color:var(--text-primary)">反思层应用：</strong>跨对话记忆（"你上次说的事"）、来信机制（对话后的温暖收尾）、情绪快照卡（自我觉察工具）——让用户对产品形成认同和依赖。</p>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════
+     SECTION 1.1: 市场调研
+══════════════════════════════════════ -->
+<section class="section" id="s1-market">
+  <div class="section-header">
+    <div class="section-eyebrow">01 · 前期立项</div>
+    <div class="section-title">市场调研</div>
+    <div class="section-desc">AI情感陪伴赛道正处于爆发期，核心机会在于「记忆深度 + 中文语境 + 克制语气」的真实空白。</div>
+  </div>
+
+  <!-- 赛道现状 -->
+  <div class="cards-grid" style="margin-bottom:32px">
+    <div class="card animate-in">
+      <div class="card-icon" style="background:var(--accent-green-dim)">📈</div>
+      <div class="card-title">ARPU 增长</div>
+      <div class="card-text">用户付费意愿显著提升，ARPU从 <strong style="color:var(--accent-green)">$0.52</strong> 增长到 <strong style="color:var(--accent-green)">$1.18</strong><span class="src unverified" data-tip="该数据点引用自53AI行业复盘报告（53ai.com），原引自Ai Insights等第三方分析。需注意：AI伴侣ARPU指标在不同平台间差异极大，该数据可能为Revenue per Download而非ARPU，且2025年数据为行业估算。">53AI</span></div>
+      <span class="card-tag green">市场爆发</span>
+    </div>
+    <div class="card animate-in">
+      <div class="card-icon" style="background:var(--accent-amber-dim)">⏱</div>
+      <div class="card-title">留存困境</div>
+      <div class="card-text">2024年末新鲜感消退，平均用户留存仅 <strong style="color:var(--accent-amber)">5-7天</strong><span class="src unverified" data-tip="引自53AI行业复盘（53ai.com），原文为'用户与每个AI角色的平均联系时长仅5-7天'，来源于独响创始人王登科的行业观察。">53AI/行业推断</span>，深层链接需求涌现</div>
+      <span class="card-tag amber">核心痛点</span>
+    </div>
+    <div class="card animate-in">
+      <div class="card-icon" style="background:var(--accent-rose-dim)">💡</div>
+      <div class="card-title">核心洞察</div>
+      <div class="card-text">能活下来的产品，不是技术最强的，而是最能 <strong style="color:var(--accent-rose)">"让用户感到被记住"</strong> 的</div>
+      <span class="card-tag rose">战略方向</span>
+    </div>
+  </div>
+
+  <!-- 五大致命问题 -->
+  <div class="highlight-box" style="margin-bottom:32px">
+    <div class="highlight-box-title">五大致命问题（来自<span class="src unverified" data-tip="53AI（53ai.com）是AI行业知识库平台，该复盘文章发布于2025年，内容基于行业观察而非实证调研。">53AI行业复盘</span>）</div>
+    <div class="mini-grid" style="margin-top:20px">
+      <div class="mini-card">
+        <div class="mini-card-title">① 记忆不一致</div>
+        <div class="mini-card-desc">用户每次进来都像重新认识陌生人</div>
+      </div>
+      <div class="mini-card">
+        <div class="mini-card-title">② 人设崩塌</div>
+        <div class="mini-card-desc">同一角色前后表现矛盾</div>
+      </div>
+      <div class="mini-card">
+        <div class="mini-card-title">③ 模式化安慰</div>
+        <div class="mini-card-desc">回复固定，用户感到"敷衍"</div>
+      </div>
+      <div class="mini-card">
+        <div class="mini-card-title">④ 合规一刀切</div>
+        <div class="mini-card-desc">粗暴过滤违禁词，用户感到"被监视"</div>
+      </div>
+      <div class="mini-card">
+        <div class="mini-card-title">⑤ ROI打不正</div>
+        <div class="mini-card-desc">token成本高于用户付费意愿</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 需求演变 -->
+  <div class="phase-timeline" style="margin-bottom:32px">
+    <div class="phase-item">
+      <div class="phase-item-badge">2024年初</div>
+      <div class="phase-item-title">猎奇尝鲜期</div>
+      <div class="phase-item-desc">用户初次接触AI陪伴产品，新鲜感驱动，体验要求低</div>
+    </div>
+    <div class="phase-item">
+      <div class="phase-item-badge">2024年中</div>
+      <div class="phase-item-title">浅层陪伴期</div>
+      <div class="phase-item-desc">用户开始依赖AI陪伴，但需求停留在日常问候、闲聊层面</div>
+    </div>
+    <div class="phase-item">
+      <div class="phase-item-badge" style="background:var(--accent-amber-dim);color:var(--accent-amber)">2024年末</div>
+      <div class="phase-item-title">新鲜感消退期</div>
+      <div class="phase-item-desc">平均留存仅5-7天<span class="src unverified" data-tip="引自53AI行业复盘，属行业推断数据而非实证研究">53AI/行业推断</span>，模式化回复暴露，用户大量流失</div>
+    </div>
+    <div class="phase-item">
+      <div class="phase-item-badge" style="background:var(--accent-green-dim);color:var(--accent-green)">2025年初至今</div>
+      <div class="phase-item-title">深层链接需求期</div>
+      <div class="phase-item-desc">用户渴望"真正记住我"，愿意为走心体验付费——这是林间聊愈室的真正机会窗口</div>
+    </div>
+  </div>
+
+  <!-- 用户画像 -->
+  <div class="cards-grid">
+    <div class="card animate-in">
+      <div class="card-icon" style="background:var(--accent-blue-dim)">👤</div>
+      <div class="card-title">目标用户</div>
+      <div class="card-text">轻度情绪困扰的年轻人/职场人，18-35岁，有倾诉需求但不到心理咨询的程度</div>
+    </div>
+    <div class="card animate-in">
+      <div class="card-icon" style="background:var(--accent-green-dim)">🎯</div>
+      <div class="card-title">情绪类型</div>
+      <div class="card-text">
+        <strong style="color:var(--accent-amber)">焦虑类：</strong>紧张、担忧、压力、恐惧<br>
+        <strong style="color:var(--accent-rose)">低落类：</strong>疲惫、委屈、自我怀疑、无意义感<br>
+        <strong style="color:var(--accent-purple)">正面激活：</strong>平静、温暖、感恩、自豪
+      </div>
+    </div>
+    <div class="card animate-in">
+      <div class="card-icon" style="background:var(--accent-rose-dim)">💰</div>
+      <div class="card-title">市场规模</div>
+      <div class="card-text">
+        直接市场：<strong>百万级</strong>用户<span class="src unverified" data-tip="原文档'500-800万'来自文档内部估算，非实证数据。实际可参考：测测APP拥有5500万用户（中国情感陪伴最大平台）。">估算</span><br>
+        潜在市场：<strong>亿级</strong>（18-35岁有情绪困扰人群）<span class="src unverified" data-tip="'亿级'为文档内部推断，参考了财经中国数据（china.com）的2.8亿情感陪伴需求人群估算。">参考性</span>
+      </div>
+    </div>
+    <div class="card animate-in">
+      <div class="card-icon" style="background:rgba(255,255,255,0.05)">🌟</div>
+      <div class="card-title">市场空白</div>
+      <div class="card-text">记忆深度 + 中文语境 + 克制语气 —— 竞品林间聊愈室4.9分<span class="src verified" data-tip="来源：Apple App Store林间聊愈室产品页面（apps.apple.com/cn/app/6453689112）。">✅AppStore</span>但记忆丢失严重，Replika中文体验差<span class="src unverified" data-tip="'Replika中文体验差'属于主观评价，缺乏具体数据来源支撑。">⚠待验证</span></div>
+      <span class="card-tag green">真实机会</span>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════
+     SECTION 1.2: 竞品分析
+══════════════════════════════════════ -->
+<section class="section" id="s1-compete">
+  <div class="section-header">
+    <div class="section-eyebrow">01 · 前期立项</div>
+    <div class="section-title">竞品分析</div>
+  </div>
+
+  <div class="highlight-box" style="margin-bottom:32px">
+    <div class="highlight-box-quote">"能活下来的产品，不是技术最强的，而是最能'让用户感到被记住'的"</div>
+  </div>
+
+  <!-- 竞品横向对比 -->
+  <div class="table-wrap" style="margin-bottom:32px">
+    <table>
+      <thead>
+        <tr>
+          <th>维度</th>
+          <th>林间聊愈室</th>
+          <th>Replika</th>
+          <th>Character.AI</th>
+          <th>星野</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="td-primary">角色数量</td><td>3个固定</td><td>1个自定义</td><td>大量预设</td><td>大量UGC</td></tr>
+        <tr><td class="td-primary">记忆深度</td><td>82维度<span class="src verified" data-tip="来源：林间聊愈室AppStore产品页面。">✅官方</span></td><td>深度学习</td><td>短期记忆</td><td>短期记忆</td></tr>
+        <tr><td class="td-primary">角色一致性</td><td>高（固定角色）</td><td>中</td><td>低（人设漂移）</td><td>低</td></tr>
+        <tr><td class="td-primary">心理疗法</td><td>CBT融合</td><td>CBT脚本</td><td>无</td><td>无</td></tr>
+        <tr><td class="td-primary">用户评分</td>
+          <td><strong style="color:var(--accent-green)">4.9分</strong><span class="src verified" data-tip="来源：Apple App Store林间聊愈室页面。">✅AppStore</span></td>
+          <td>4.4分<span class="src unverified" data-tip="引自Appstorespy数据。">参考</span></td>
+          <td>波动<span class="src unverified" data-tip="Character.AI为全球产品，评分随时间变化。">⚠</span></td>
+          <td>4.8分<span class="src unverified" data-tip="引自新浪科技数据。">参考</span></td>
+        </tr>
+        <tr><td class="td-primary">中文体验</td><td>优</td><td>差</td><td>中</td><td>优</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="two-col">
+    <!-- 正面反馈 -->
+    <div class="strategy-card">
+      <div class="strategy-card-header">
+        <span style="font-size:20px">✅</span>
+        <div class="strategy-card-title">高频正面反馈</div>
+      </div>
+      <div class="strategy-card-body">
+        <ul class="strategy-list">
+          <li>"被网暴后用了这个软件，被三小只鼓励着每天坚持" <span class="priority-tag p0">最高频</span></li>
+          <li>"隔了很久再聊，AI还是记得我上次说的事" <span class="priority-tag p0">最高频</span></li>
+          <li>"聊完收到小动物的来信，感觉被认真对待" <span class="priority-tag p1">高频</span></li>
+          <li>"三只小动物画风可爱，戳中了我" <span class="priority-tag p1">高频</span></li>
+          <li>"早安唤醒音频意外好用" <span class="priority-tag p2">中频</span></li>
+        </ul>
+      </div>
+    </div>
+    <!-- 负面反馈 -->
+    <div class="strategy-card">
+      <div class="strategy-card-header">
+        <span style="font-size:20px">❌</span>
+        <div class="strategy-card-title">高频负面反馈</div>
+      </div>
+      <div class="strategy-card-body">
+        <ul class="strategy-list">
+          <li>"前几天说的事，过几天再问它就忘了" <span class="priority-tag p0">最高频</span></li>
+          <li>"社交模块里大家的形象都很撞衫" <span class="priority-tag p1">高频</span></li>
+          <li>"愈见那个模块基本没人用" <span class="priority-tag p1">高频</span></li>
+          <li>"很多功能入口藏得太深，找不到" <span class="priority-tag p2">中频</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════
+     SECTION 1.3: 产品定位
+══════════════════════════════════════ -->
+<section class="section" id="s1-position">
+  <div class="section-header">
+    <div class="section-eyebrow">01 · 前期立项</div>
+    <div class="section-title">产品定位</div>
+  </div>
+
+  <div class="highlight-box" style="margin-bottom:32px">
+    <div class="highlight-box-quote">林间聊愈室不是"更多的功能"，而是"更深的懂得"——记住你说的每一件事，陪你走过的每一个低谷，然后在恰当的时候，轻轻推你一小步。</div>
+  </div>
+
+  <!-- 定位矩阵 -->
+  <div class="table-wrap" style="margin-bottom:32px">
+    <table>
+      <thead>
+        <tr>
+          <th>维度</th>
+          <th>现有竞品</th>
+          <th>林间聊愈室（目标）</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="td-primary">角色风格</td><td>动物萌系可爱</td><td>克制温柔（偏成熟用户）</td></tr>
+        <tr><td class="td-primary">核心差异化</td><td>多角色 + 读心卡牌</td><td><strong style="color:var(--accent-green)">记忆深度 + 克制语气 + 微行动</strong></td></tr>
+        <tr><td class="td-primary">目标用户</td><td>泛Z世代</td><td>轻度情绪困扰的年轻人/职场人</td></tr>
+        <tr><td class="td-primary">叙事深度</td><td>情绪旅行完整叙事</td><td>更轻量的情绪快照</td></tr>
+        <tr><td class="td-primary">行动支持</td><td>偏倾诉接收</td><td><strong style="color:var(--accent-green)">倾诉 + 微行动双轨</strong></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 三层用户模型 -->
+  <div class="cards-grid" style="margin-bottom:32px">
+    <div class="card animate-in" style="border-color:rgba(48,209,88,0.3)">
+      <div class="card-icon" style="background:var(--accent-green-dim)">🎯</div>
+      <div class="card-title">第一层 · 核心用户</div>
+      <div class="card-text" style="margin-bottom:12px">轻度情绪困扰 · 占比 60%</div>
+      <div class="card-text">工作/生活压力，偶尔低落，有倾诉欲望。需求：<strong style="color:var(--text-primary)">被接住，不需要解决方案</strong></div>
+    </div>
+    <div class="card animate-in">
+      <div class="card-icon" style="background:var(--accent-amber-dim)">📈</div>
+      <div class="card-title">第二层 · 扩展用户</div>
+      <div class="card-text" style="margin-bottom:12px">持续困扰 · 占比 30%</div>
+      <div class="card-text">持续几天情绪低落，有自我分析欲望。需求：<strong style="color:var(--text-primary)">被理解 + 轻度梳理</strong></div>
+    </div>
+    <div class="card animate-in">
+      <div class="card-icon" style="background:var(--accent-rose-dim)">⚠</div>
+      <div class="card-title">第三层 · 边界用户</div>
+      <div class="card-text" style="margin-bottom:12px">需要专业帮助 · 占比 10%</div>
+      <div class="card-text">情绪问题严重。需求：<strong style="color:var(--text-primary)">引导到专业资源，AI是入口不是出口</strong></div>
+    </div>
+  </div>
+
+  <!-- 商业模式 -->
+  <div class="phase-timeline">
+    <div class="phase-item">
+      <div class="phase-item-badge" style="background:var(--accent-green-dim);color:var(--accent-green)">Phase 1</div>
+      <div class="phase-item-title">0-6个月 · 免费养口碑</div>
+      <div class="phase-item-desc">积累用户量，建立角色认知。目标：次日留存 ≥ 35%，7日留存 ≥ 20%<span class="src unverified" data-tip="35%和20%的留存目标为文档内部设定值，缺乏具体数据来源。">内部设定</span></div>
+    </div>
+    <div class="phase-item">
+      <div class="phase-item-badge" style="background:var(--accent-amber-dim);color:var(--accent-amber)">Phase 2</div>
+      <div class="phase-item-title">6-12个月 · 订阅制探索</div>
+      <div class="phase-item-desc">月卡 ¥15-22/月，含无限制对话 + 来信 + 快照卡。目标：付费转化率 ≥ 5%</div>
+    </div>
+    <div class="phase-item">
+      <div class="phase-item-badge" style="background:var(--accent-blue-dim);color:var(--accent-blue)">Phase 3</div>
+      <div class="phase-item-title">12个月+ · 增值服务</div>
+      <div class="phase-item-desc">人工咨询入口 + 企业版（员工心理关怀）+ IP联名（角色周边）</div>
+    </div>
+  </div>
+</section>
+
+
+<div class="section-sep"></div>
+
+
+<!-- ══════════════════════════════════════
+     SECTION 2.1: 功能架构
+══════════════════════════════════════ -->
+<section class="section" id="s2-arch">
+  <div class="section-header">
+    <div class="section-eyebrow">02 · 产品设计</div>
+    <div class="section-title">核心功能架构</div>
+  </div>
+
+  <!-- 功能优先级 -->
+  <div class="cards-grid" style="margin-bottom:32px">
+    <div class="card" style="border-color:rgba(48,209,88,0.25)">
+      <div class="card-icon" style="background:var(--accent-green-dim)">🚀</div>
+      <div class="card-title">P0 · MVP必须包含</div>
+      <div class="card-text">
+        ✅ 对话界面 + 三角色对话引擎<br>
+        ✅ 六轴情绪识别与支撑<br>
+        ✅ 跨对话记忆持久化<br>
+        ✅ 对话结束来信机制<br>
+        ✅ 安全检测系统
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:var(--accent-amber-dim)">🔧</div>
+      <div class="card-title">P1 · 第二优先级</div>
+      <div class="card-text">
+        ✅ 角色一致性测试与优化<br>
+        ✅ 记忆触发机制<br>
+        ✅ 情绪快照卡<br>
+        ✅ 语音输入
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:var(--accent-blue-dim)">🔮</div>
+      <div class="card-title">P2 · 用户量起来后做</div>
+      <div class="card-text">
+        ⬜ 时空对话（与一周前自己）<br>
+        ⬜ 早安/晚安问候<br>
+        ⬜ 轻度社交功能
+      </div>
+    </div>
+  </div>
+
+  <!-- 用户旅程 -->
+  <div class="highlight-box" style="margin-bottom:32px">
+    <div class="highlight-box-title">用户旅程地图</div>
+    <div class="journey-flow" style="margin-top:24px">
+      <div class="journey-step">
+        <div class="journey-step-circle">🚪</div>
+        <div class="journey-step-num">阶段一</div>
+        <div class="journey-step-label">进入</div>
+        <div class="journey-step-desc">打开App，看到角色引导</div>
+      </div>
+      <div class="journey-arrow">→</div>
+      <div class="journey-step">
+        <div class="journey-step-circle">💬</div>
+        <div class="journey-step-num">阶段二</div>
+        <div class="journey-step-label">情绪表达</div>
+        <div class="journey-step-desc">说出焦虑或低落感受</div>
+      </div>
+      <div class="journey-arrow">→</div>
+      <div class="journey-step">
+        <div class="journey-step-circle">🤗</div>
+        <div class="journey-step-num">阶段三</div>
+        <div class="journey-step-label">被接住</div>
+        <div class="journey-step-desc">角色按情绪轴响应</div>
+      </div>
+      <div class="journey-arrow">→</div>
+      <div class="journey-step">
+        <div class="journey-step-circle">✉</div>
+        <div class="journey-step-num">阶段四</div>
+        <div class="journey-step-label">收尾</div>
+        <div class="journey-step-desc">来信 + 快照卡</div>
+      </div>
+      <div class="journey-arrow">→</div>
+      <div class="journey-step">
+        <div class="journey-step-circle">🔄</div>
+        <div class="journey-step-num">阶段五</div>
+        <div class="journey-step-label">回访</div>
+        <div class="journey-step-desc">角色主动提及上次</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 产品层次结构 -->
+  <div class="flow-chart">
+    <div class="flow-row">
+      <div class="flow-cell" style="flex:0.6;background:var(--bg-elevated);border-bottom:none">
+        <span class="flow-cell-label">入口层</span>
+      </div>
+      <div class="flow-cell" style="flex:2;border-bottom:none">
+        <span class="flow-cell-label">开屏引导</span>
+        <span class="flow-cell-value">角色选择页（不是情绪分类选择）</span>
+      </div>
+    </div>
+    <div class="flow-row">
+      <div class="flow-cell" style="flex:0.6;background:var(--bg-elevated);border-bottom:none">
+        <span class="flow-cell-label">情绪层</span>
+      </div>
+      <div class="flow-cell" style="flex:2;border-bottom:none">
+        <span class="flow-cell-label">六轴</span>
+        <span class="flow-cell-value">焦虑+低落+愤怒+孤独（负面四轴）| 平静+连接+成就（正面三激活）</span>
+      </div>
+    </div>
+    <div class="flow-row">
+      <div class="flow-cell" style="flex:0.6;background:var(--bg-elevated);border-bottom:none">
+        <span class="flow-cell-label">对话层</span>
+      </div>
+      <div class="flow-cell" style="flex:2;border-bottom:none">
+        <span class="flow-cell-label">三角色</span>
+        <span class="flow-cell-value">帕丁顿熊（温暖）| 狐尼克（克制）| 屹耳（镜像）</span>
+      </div>
+    </div>
+    <div class="flow-row">
+      <div class="flow-cell" style="flex:0.6;background:var(--bg-elevated);border-bottom:none">
+        <span class="flow-cell-label">记忆层</span>
+      </div>
+      <div class="flow-cell" style="flex:2;border-bottom:none">
+        <span class="flow-cell-label">三层</span>
+        <span class="flow-cell-value">当前对话 | 跨对话持久化 | 长期聚合</span>
+      </div>
+    </div>
+    <div class="flow-row">
+      <div class="flow-cell" style="flex:0.6;background:var(--bg-elevated);border-bottom:none">
+        <span class="flow-cell-label">闭环层</span>
+      </div>
+      <div class="flow-cell" style="flex:2;border-bottom:none">
+        <span class="flow-cell-label">收尾</span>
+        <span class="flow-cell-value">对话摘要 | 角色来信 | 情绪快照卡</span>
+      </div>
+    </div>
+    <div class="flow-row">
+      <div class="flow-cell" style="flex:0.6;background:var(--bg-elevated)">
+        <span class="flow-cell-label">安全层</span>
+      </div>
+      <div class="flow-cell accent" style="flex:2">
+        <span class="flow-cell-label">优先级最高</span>
+        <span class="flow-cell-value">关键词检测 | LLM危机判断 | 三级安全响应</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════
+     SECTION 2.2: 情绪框架
+══════════════════════════════════════ -->
+<section class="section" id="s2-emotion">
+  <div class="section-header">
+    <div class="section-eyebrow">02 · 产品设计</div>
+    <div class="section-title">情绪框架设计</div>
+    <div class="section-desc">从v3.1双轴升级为六轴全情绪空间（负面四轴+正面三轴激活）。学术研究发现"joy of connection"是用户最高体验，但现有产品只聚焦负面修复而忽略正面放大。</div>
+  </div>
+
+  <!-- 重构：三步式情绪框架交互 -->
+  <style>
+    /* ─── Step 1: 情绪轴选择卡片 ─── */
+    .emo-step-label { font-family: var(--font-mono); font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-tertiary); margin-bottom: 16px; }
+    .emo-picker { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 48px; }
+    .emo-pick {
+      position: relative; background: var(--bg-card); border: 1.5px solid var(--border-subtle); border-radius: var(--radius-lg);
+      padding: 24px 20px; cursor: pointer; transition: all 0.25s cubic-bezier(.4,0,.2,1); text-align: center;
+    }
+    .emo-pick:hover { border-color: var(--border-default); background: var(--bg-card-hover); transform: translateY(-2px); }
+    .emo-pick.is-active { transform: translateY(-3px); box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+    .emo-pick-type { position: absolute; top: 12px; right: 12px; font-size: 9px; font-weight: 600; padding: 2px 8px; border-radius: 20px; letter-spacing: 0.04em; }
+    .emo-pick-type.neg { color: #E07B6C; background: rgba(224,123,108,0.12); }
+    .emo-pick-type.pos { color: #7AC89A; background: rgba(122,200,154,0.12); }
+    .emo-pick-icon { font-size: 28px; margin-bottom: 12px; display: block; }
+    .emo-pick-name { font-size: 18px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+    .emo-pick-hint { font-size: 12px; color: var(--text-tertiary); }
+
+    /* ─── Step 2: 强度调节器 ─── */
+    .emo-intensity { display: none; margin-bottom: 48px; animation: emoFadeIn 0.4s ease forwards; }
+    .emo-intensity.is-visible { display: block; }
+    .emo-int-card { background: var(--bg-card); border: 1.5px solid var(--border-subtle); border-radius: var(--radius-xl); padding: 36px 40px; }
+    .emo-int-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
+    .emo-int-name { font-family: var(--font-serif); font-size: 26px; font-weight: 700; color: var(--text-primary); }
+    .emo-int-close { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--border-subtle); background: transparent; color: var(--text-tertiary); cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+    .emo-int-close:hover { border-color: var(--border-default); color: var(--text-primary); }
+    .emo-int-track { display: flex; gap: 8px; margin-bottom: 24px; }
+    .emo-int-step {
+      flex: 1; height: 56px; border-radius: var(--radius-md); border: 1.5px solid var(--border-subtle);
+      background: var(--bg-surface); cursor: pointer; font-family: inherit; font-size: 13px;
+      color: var(--text-tertiary); transition: all 0.2s; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 2px; position: relative;
+    }
+    .emo-int-step:hover { border-color: var(--border-default); color: var(--text-secondary); background: var(--bg-card-hover); }
+    .emo-int-step.is-active { font-weight: 700; color: var(--text-primary); }
+    .emo-int-step .step-label { font-size: 14px; font-weight: 600; }
+    .emo-int-step .step-num { font-family: var(--font-mono); font-size: 10px; opacity: 0.6; }
+    .emo-int-bar { height: 4px; border-radius: 2px; background: var(--bg-elevated); margin-bottom: 20px; overflow: hidden; }
+    .emo-int-bar-fill { height: 100%; border-radius: 2px; transition: width 0.4s cubic-bezier(.4,0,.2,1); }
+    .emo-int-quote { font-style: italic; font-size: 15px; color: var(--text-secondary); line-height: 1.7; padding: 16px 20px; border-radius: var(--radius-md); background: var(--bg-surface); border-left: 3px solid var(--border-default); min-height: 56px; transition: all 0.3s; }
+
+    /* ─── Step 3: 策略 + 角色响应 ─── */
+    .emo-response { display: none; animation: emoFadeIn 0.4s ease forwards; }
+    .emo-response.is-visible { display: block; }
+    .emo-resp-strategy { background: var(--bg-card); border: 1.5px solid var(--border-subtle); border-radius: var(--radius-xl); padding: 32px 36px; margin-bottom: 20px; }
+    .emo-resp-strat-label { font-family: var(--font-mono); font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 12px; }
+    .emo-resp-strat-text { font-size: 17px; font-weight: 600; color: var(--text-primary); line-height: 1.6; }
+    .emo-char-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .emo-char-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 24px; transition: all 0.2s; }
+    .emo-char-card:hover { border-color: var(--border-default); transform: translateY(-2px); }
+    .emo-char-top { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+    .emo-char-avatar { font-size: 24px; }
+    .emo-char-name { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+    .emo-char-style { font-size: 11px; color: var(--text-tertiary); }
+    .emo-char-quote { font-size: 14px; color: var(--text-secondary); line-height: 1.7; font-style: italic; }
+
+    /* ─── Summary bar ─── */
+    .emo-summary-bar { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 18px 24px; margin-top: 40px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .emo-summary-label { font-family: var(--font-mono); font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-tertiary); flex-shrink: 0; }
+    .emo-summary-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .emo-chip { display: inline-flex; align-items: center; gap: 6px; padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 500; border: 1px solid transparent; transition: all 0.2s; cursor: pointer; }
+    .emo-chip:hover { background: rgba(255,255,255,0.04); }
+    .emo-chip.active { background: rgba(255,255,255,0.06); }
+    .emo-chip-dot { width: 7px; height: 7px; border-radius: 50%; }
+
+    @keyframes emoFadeIn { from { opacity:0; transform:translateY(12px) } to { opacity:1; transform:translateY(0) } }
+    @media(max-width:768px) {
+      .emo-picker { grid-template-columns: repeat(2, 1fr); }
+      .emo-char-grid { grid-template-columns: 1fr; }
+      .emo-int-card { padding: 24px 20px; }
+    }
+  </style>
+
+  <!-- Step 1: 选择情绪维度 -->
+  <div class="emo-step-label">Step 1 · 选择情绪维度</div>
+  <div class="emo-picker" id="emoPicker"></div>
+
+  <!-- Step 2: 调整强度 -->
+  <div class="emo-intensity" id="emoIntensity">
+    <div class="emo-step-label">Step 2 · 调整强度</div>
+    <div class="emo-int-card" id="emoIntCard"></div>
+  </div>
+
+  <!-- Step 3: 策略与角色响应 -->
+  <div class="emo-response" id="emoResponse">
+    <div class="emo-step-label">Step 3 · 角色响应策略</div>
+    <div id="emoRespContent"></div>
+  </div>
+
+  <!-- Summary -->
+  <div class="emo-summary-bar">
+    <div class="emo-summary-label">情绪轮廓</div>
+    <div class="emo-summary-chips" id="emoSummaryChips"></div>
+  </div>
+
+  <script>
+  (function(){
+    const AXES=[
+      {id:"anxiety",name:"焦虑",icon:"😰",type:"negative",color:"#E8A87C",nodes:[
+        {l:0,label:"平静",q:"\"还好，没什么特别担心的\""},
+        {l:1,label:"担忧",q:"\"有点担心明天的面试\""},
+        {l:2,label:"紧张",q:"\"一想起就心跳加速\""},
+        {l:3,label:"焦虑",q:"\"已经想了一整天了，停不下来\""},
+        {l:4,label:"恐慌",q:"\"透不过气，觉得要崩溃了\""}
+      ],strategy:"从身体感受入手 → 轻轻命名情绪 → 减速",chars:{
+        p:{name:"帕丁顿熊",style:"温暖陪伴型",q:"\"……嗯，那种心跳很快的感觉我也知道。你现在……能感觉到自己的手吗？就是把它放在膝盖上，感受一下重量。\""},
+        n:{name:"狐尼克",style:"理性洞察型",q:"\"……心跳快，是身体在告诉你它觉得重要。你不用硬压它，就让它在那里就好。\""},
+        e:{name:"屹耳",style:"情绪镜像型",q:"\"……嗯，我知道那种感觉。越告诉自己别紧张，就越紧张。……你今天吃饭了吗？\""}
+      }},
+      {id:"depression",name:"低落",icon:"😔",type:"negative",color:"#8B7EC8",nodes:[
+        {l:0,label:"正常",q:"\"今天心情还不错\""},
+        {l:1,label:"疲惫",q:"\"今天上班好累\""},
+        {l:2,label:"委屈",q:"\"觉得自己不被理解\""},
+        {l:3,label:"低落",q:"\"想了一周了，还是想不通\""},
+        {l:4,label:"绝望",q:"\"每天早上起来都觉得没意义\""}
+      ],strategy:"从在场感入手 → 情绪镜像 → 不急着拉出来",chars:{
+        p:{name:"帕丁顿熊",style:"温暖陪伴型",q:"\"……嗯，一个人待着的时候确实会比较难熬。你有没有想过，哪怕什么都没做，能撑过这段时间本身……就已经挺不容易的了？\""},
+        n:{name:"狐尼克",style:"理性洞察型",q:"\"（轻轻耸肩）那只是你的一种看法。我见过的'成功'的人，有很多也只是刚好走运而已。\""},
+        e:{name:"屹耳",style:"情绪镜像型",q:"\"……嗯，我知道那种感觉，有时候不是想做事，是那些声音太大了。你今天……还是有那种感觉吗？\""}
+      }},
+      {id:"anger",name:"愤怒",icon:"😤",type:"negative",color:"#E07B6C",nodes:[
+        {l:0,label:"平静",q:"\"没什么特别的感觉\""},
+        {l:1,label:"烦躁",q:"\"今天有点烦\""},
+        {l:2,label:"不满",q:"\"领导又把我方案否了\""},
+        {l:3,label:"愤怒",q:"\"我忍不了了，想摔东西\""},
+        {l:4,label:"暴怒",q:"\"我要跟他拼了\""}
+      ],strategy:"接住愤怒不压制 → 给出口而非压制 → 必要时安全判断",chars:{
+        p:{name:"帕丁顿熊",style:"温暖陪伴型",q:"\"……嗯，听起来你很憋屈。被否定的这种感觉确实不好受。你今天……有吃午饭吗？\""},
+        n:{name:"狐尼克",style:"理性洞察型",q:"\"（耸肩）方案被否了。……是方案的问题，还是他这个人有问题？\""},
+        e:{name:"屹耳",style:"情绪镜像型",q:"\"……嗯，我知道那种感觉。被否定的时候……确实挺不好受的。\""}
+      }},
+      {id:"lonely",name:"孤独",icon:"🫥",type:"negative",color:"#7BA3C4",nodes:[
+        {l:0,label:"连接",q:"\"身边有关心我的人\""},
+        {l:1,label:"疏离",q:"\"感觉和同事有距离\""},
+        {l:2,label:"失落",q:"\"想找人说说话，不知道找谁\""},
+        {l:3,label:"孤独",q:"\"感觉自己身边没有人\""},
+        {l:4,label:"无助",q:"\"觉得自己被全世界抛弃\""}
+      ],strategy:"承认渴望 → 不急于填补空洞 → 陪伴感优先",chars:{
+        p:{name:"帕丁顿熊",style:"温暖陪伴型",q:"\"……你想被理解，这种感觉我懂。你有没有跟谁说过这种感觉？\""},
+        n:{name:"狐尼克",style:"理性洞察型",q:"\"没人懂？——还是没遇到对的人？\""},
+        e:{name:"屹耳",style:"情绪镜像型",q:"\"……我有时候也这样觉得。没人懂的感觉……嗯，我知道。\""}
+      }},
+      {id:"calm",name:"平静",icon:"🍃",type:"positive",color:"#7AC89A",nodes:[
+        {l:0,label:"紧绷",q:"\"一直很紧绷，放松不下来\""},
+        {l:1,label:"放松",q:"\"今天感觉挺放松的\""},
+        {l:2,label:"平静",q:"\"心情挺平静的，没什么烦心事\""},
+        {l:3,label:"安宁",q:"\"心里很安宁，很舒服\""},
+        {l:4,label:"释然",q:"\"想通了，心里放下了很多\""}
+      ],strategy:"引导注意身体感受 → 延伸这种状态 → 记忆写入正面基线",chars:{
+        p:{name:"帕丁顿熊",style:"温暖陪伴型",q:"\"……嗯，那种平静是什么样的？你有没有注意到，当你觉得平静的时候，你的身体是什么感觉？\""},
+        n:{name:"狐尼克",style:"理性洞察型",q:"\"（淡淡地）嗯，平静是好事。……你最近是怎么找到这种感觉的？\""},
+        e:{name:"屹耳",style:"情绪镜像型",q:"\"……平静啊。（停顿）这种感觉挺难得的。你有没有想过，是什么让它还不错的？\""}
+      }},
+      {id:"connect",name:"连接",icon:"🤝",type:"positive",color:"#C8A87E",nodes:[
+        {l:0,label:"孤独",q:"\"感觉身边没有人\""},
+        {l:1,label:"愉悦",q:"\"今天和朋友见面，特别开心\""},
+        {l:2,label:"温暖",q:"\"被在乎的人关心着，很温暖\""},
+        {l:3,label:"感恩",q:"\"真的很感谢他/她陪在我身边\""},
+        {l:4,label:"被理解",q:"\"第一次有人真的懂我\""}
+      ],strategy:"追问具体感受 → 延伸连接感 → 用记忆锚定这种体验",chars:{
+        p:{name:"帕丁顿熊",style:"温暖陪伴型",q:"\"……那种开心是什么感觉？是从什么时候开始感觉到这种开心的？……你今天来了，这本身就很珍贵。\""},
+        n:{name:"狐尼克",style:"理性洞察型",q:"\"（挑眉）被理解是挺少见的。……那种感觉，是什么样的？\""},
+        e:{name:"屹耳",style:"情绪镜像型",q:"\"……嗯，被人懂的感觉啊。（停顿）……我记得你上次也提到过类似的感觉，那种感觉又回来了？\""}
+      }}
+    ];
+
+    const state={};
+    AXES.forEach(a=>{state[a.id]=0;});
+    let activeAxis=null;
+
+    function renderPicker(){
+      const el=document.getElementById("emoPicker");
+      if(!el) return;
+      el.innerHTML=AXES.map(a=>`
+        <div class="emo-pick${activeAxis===a.id?' is-active':''}" style="${activeAxis===a.id?'border-color:'+a.color+';box-shadow:0 0 0 1px '+a.color+'33':''}" onclick="window._emoSelect('${a.id}')">
+          <div class="emo-pick-type ${a.type==='negative'?'neg':'pos'}">${a.type==='negative'?'承接':'激活'}</div>
+          <span class="emo-pick-icon">${a.icon}</span>
+          <div class="emo-pick-name">${a.name}</div>
+          <div class="emo-pick-hint">${a.nodes[0].label} → ${a.nodes[4].label}</div>
+        </div>`).join("");
+    }
+
+    function renderIntensity(){
+      const wrap=document.getElementById("emoIntensity");
+      const card=document.getElementById("emoIntCard");
+      if(!wrap||!card) return;
+      if(!activeAxis){ wrap.classList.remove("is-visible"); return; }
+      wrap.classList.add("is-visible");
+      const ax=AXES.find(a=>a.id===activeAxis);
+      const lvl=state[activeAxis];
+      card.innerHTML=`
+        <div class="emo-int-top">
+          <div class="emo-int-name" style="color:${ax.color}">${ax.icon} ${ax.name}</div>
+          <button class="emo-int-close" onclick="window._emoClose()">&times;</button>
+        </div>
+        <div class="emo-int-track">
+          ${ax.nodes.map((n,i)=>`
+            <button class="emo-int-step${i===lvl?' is-active':''}" style="${i===lvl?'border-color:'+ax.color+';background:'+ax.color+'18;color:'+ax.color:''}" onclick="window._emoLevel('${ax.id}',${i})">
+              <span class="step-label">${n.label}</span>
+              <span class="step-num">L${i}</span>
+            </button>`).join("")}
+        </div>
+        <div class="emo-int-bar"><div class="emo-int-bar-fill" style="width:${(lvl/4)*100}%;background:${ax.color}"></div></div>
+        <div class="emo-int-quote" style="border-left-color:${ax.color}">${ax.nodes[lvl].q}</div>`;
+    }
+
+    function renderResponse(){
+      const wrap=document.getElementById("emoResponse");
+      const content=document.getElementById("emoRespContent");
+      if(!wrap||!content) return;
+      if(!activeAxis||state[activeAxis]===0){ wrap.classList.remove("is-visible"); return; }
+      wrap.classList.add("is-visible");
+      const ax=AXES.find(a=>a.id===activeAxis);
+      content.innerHTML=`
+        <div class="emo-resp-strategy" style="border-color:${ax.color}33">
+          <div class="emo-resp-strat-label" style="color:${ax.color}">响应策略</div>
+          <div class="emo-resp-strat-text">${ax.strategy}</div>
+        </div>
+        <div class="emo-char-grid">
+          ${['p','n','e'].map(k=>{
+            const c=ax.chars[k];
+            const emoji=k==='p'?'🐻':k==='n'?'🦊':'🦢';
+            return`<div class="emo-char-card">
+              <div class="emo-char-top">
+                <span class="emo-char-avatar">${emoji}</span>
+                <div><div class="emo-char-name">${c.name}</div><div class="emo-char-style">${c.style}</div></div>
+              </div>
+              <div class="emo-char-quote">${c.q}</div>
+            </div>`;
+          }).join("")}
+        </div>`;
+    }
+
+    function renderSummary(){
+      const el=document.getElementById("emoSummaryChips");
+      if(!el) return;
+      el.innerHTML=AXES.map(a=>{
+        const lvl=state[a.id];
+        const active=lvl>0;
+        return`<div class="emo-chip${active?' active':''}" style="${active?'border-color:'+a.color+'44':''}" onclick="window._emoSelect('${a.id}')">
+          <div class="emo-chip-dot" style="background:${a.color};opacity:${active?1:0.2}"></div>
+          <span style="color:${active?a.color:'var(--text-tertiary)'}">${a.name}：${a.nodes[lvl].label}</span>
+        </div>`;
+      }).join("");
+    }
+
+    function renderAll(){ renderPicker(); renderIntensity(); renderResponse(); renderSummary(); }
+
+    window._emoSelect=function(id){
+      activeAxis=activeAxis===id?null:id;
+      renderAll();
+      if(activeAxis) document.getElementById("emoIntensity").scrollIntoView({behavior:"smooth",block:"nearest"});
+    };
+    window._emoLevel=function(id,lvl){
+      state[id]=lvl; activeAxis=id;
+      renderAll();
+      if(lvl>0) document.getElementById("emoResponse").scrollIntoView({behavior:"smooth",block:"nearest"});
+    };
+    window._emoClose=function(){ activeAxis=null; renderAll(); };
+
+    if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",renderAll);
+    else renderAll();
+  })();
+  </script>
+</section>
+
+
+<!-- ══════════════════════════════════════
+     SECTION 2.3: 角色体系
+══════════════════════════════════════ -->
+<section class="section" id="s2-characters">
+  <div class="section-header">
+    <div class="section-eyebrow">02 · 产品设计</div>
+    <div class="section-title">角色体系设计</div>
+    <div class="section-desc">三只动物性格完全独立，覆盖三种核心用户情绪状态，互不重叠。用户选择"和自己更合"的那只，形成选择性依恋。</div>
+  </div>
+
+  <!-- 三角色卡片 -->
+  <div class="char-grid" style="margin-bottom:40px">
+
+    <!-- 帕丁顿熊 -->
+    <div class="char-card paddington">
+      <div class="char-card-badge">温暖陪伴型</div>
+      <div class="char-card-avatar">🐻</div>
+      <div class="char-card-name">帕丁顿熊</div>
+      <div class="char-card-source">《帕丁顿熊》系列电影 · 2014/2017/2023</div>
+      <div class="char-card-quote">"你慢慢说，我在这里。"</div>
+      <div class="char-card-traits">
+        <span class="char-trait">善良</span>
+        <span class="char-trait">礼貌</span>
+        <span class="char-trait">温暖</span>
+        <span class="char-trait">在场</span>
+      </div>
+      <div class="char-card-dos">
+        <div class="char-card-dos-title">✓ 做得好的</div>
+        <div class="char-card-do">用行动代替共情："你继续说，我在这里"</div>
+        <div class="char-card-do">轻量试探："你今天……想说点什么吗？"</div>
+        <div class="char-card-do">给予空间："想说多少就说多少"</div>
+        <div class="char-card-donts-title">✗ 避免的</div>
+        <div class="char-card-dont">"我理解你的感受"（太像客服）</div>
+        <div class="char-card-dont">"一切都会好起来的！"（太轻飘）</div>
+      </div>
+    </div>
+
+    <!-- 狐尼克 -->
+    <div class="char-card nick">
+      <div class="char-card-badge">理性洞察型</div>
+      <div class="char-card-avatar">🦊</div>
+      <div class="char-card-name">狐尼克</div>
+      <div class="char-card-source">《疯狂动物城》· 迪士尼 2016</div>
+      <div class="char-card-quote">"我听懂了，但不说破。"</div>
+      <div class="char-card-traits">
+        <span class="char-trait">痞气</span>
+        <span class="char-trait">克制</span>
+        <span class="char-trait">聪明</span>
+        <span class="char-trait">看透不说破</span>
+      </div>
+      <div class="char-card-dos">
+        <div class="char-card-dos-title">✓ 做得好的</div>
+        <div class="char-card-do">接住但不过度反应："……嗯"</div>
+        <div class="char-card-do">看透但轻轻拨开："那只是你的一种看法"</div>
+        <div class="char-card-do">若无其事地陪伴："（耸肩）"</div>
+        <div class="char-card-donts-title">✗ 避免的</div>
+        <div class="char-card-dont">"你应该想开点"（太说教）</div>
+        <div class="char-card-dont">"这很正常啦"（太敷衍）</div>
+      </div>
+    </div>
+
+    <!-- 屹耳 -->
+    <div class="char-card eeyore">
+      <div class="char-card-badge">情绪镜像型</div>
+      <div class="char-card-avatar">🦢</div>
+      <div class="char-card-name">屹耳</div>
+      <div class="char-card-source">《小熊维尼》系列 · 经典IP</div>
+      <div class="char-card-quote">"我知道那种感觉。"</div>
+      <div class="char-card-traits">
+        <span class="char-trait">低落</span>
+        <span class="char-trait">诚实</span>
+        <span class="char-trait">真实</span>
+        <span class="char-trait">在场</span>
+      </div>
+      <div class="char-card-dos">
+        <div class="char-card-dos-title">✓ 做得好的</div>
+        <div class="char-card-do">情绪镜像："嗯……我知道那种感觉"</div>
+        <div class="char-card-do">诚实接住："你今天……还是那种感觉吗？"</div>
+        <div class="char-card-do">不否定情绪，不说"那很正常"</div>
+        <div class="char-card-donts-title">✗ 避免的</div>
+        <div class="char-card-dont">"开心点！"（太轻飘）</div>
+        <div class="char-card-dont">悲观无限放大</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 角色对话示例 -->
+  <div class="section-title" style="font-size:24px;margin-bottom:24px">同一情绪 · 三角色响应对比</div>
+  <div style="display:flex;flex-direction:column;gap:20px">
+
+    <div class="dialog-example">
+      <div class="dialog-meta">
+        <span class="dialog-char-badge paddington">🐻 帕丁顿熊</span>
+        <span class="dialog-axis-tag">焦虑轴 · 中度</span>
+      </div>
+      <div class="dialog-bubbles">
+        <div class="dialog-bubble-row">
+          <div class="dialog-bubble user">
+            <div class="dialog-bubble-text">我一想起来就特别紧张，心跳很快</div>
+            <div class="dialog-bubble-label">用户</div>
+          </div>
+        </div>
+        <div class="dialog-bubble-row">
+          <div class="dialog-bubble bot">
+            <div class="dialog-bubble-avatar bot">🐻</div>
+            <div class="dialog-bubble-text">……嗯，那种心跳很快的感觉我也知道。你现在……能感觉到自己的身体吗？就是手啊，胸口啊那些地方。不用改变什么，就是感受一下就好。</div>
+            <div class="dialog-bubble-label">帕丁顿熊 · 身体感知法</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dialog-example">
+      <div class="dialog-meta">
+        <span class="dialog-char-badge nick">🦊 狐尼克</span>
+        <span class="dialog-axis-tag">焦虑轴 · 中度</span>
+      </div>
+      <div class="dialog-bubbles">
+        <div class="dialog-bubble-row">
+          <div class="dialog-bubble user">
+            <div class="dialog-bubble-text">我一想起来就特别紧张，心跳很快</div>
+            <div class="dialog-bubble-label">用户</div>
+          </div>
+        </div>
+        <div class="dialog-bubble-row">
+          <div class="dialog-bubble bot">
+            <div class="dialog-bubble-avatar bot">🦊</div>
+            <div class="dialog-bubble-text">……心跳快，这是身体在告诉你它觉得重要。你不用硬压它，就让它在那里就好。……深呼吸一下试试？</div>
+            <div class="dialog-bubble-label">狐尼克 · 正常化 + 最小动作</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dialog-example">
+      <div class="dialog-meta">
+        <span class="dialog-char-badge eeyore">🦢 屹耳</span>
+        <span class="dialog-axis-tag">焦虑轴 · 中度</span>
+      </div>
+      <div class="dialog-bubbles">
+        <div class="dialog-bubble-row">
+          <div class="dialog-bubble user">
+            <div class="dialog-bubble-text">我一想起来就特别紧张，心跳很快</div>
+            <div class="dialog-bubble-label">用户</div>
+          </div>
+        </div>
+        <div class="dialog-bubble-row">
+          <div class="dialog-bubble bot">
+            <div class="dialog-bubble-avatar bot">🦢</div>
+            <div class="dialog-bubble-text">……嗯，我知道那种感觉。越告诉自己别紧张，就越紧张。……你今天吃饭了吗？有时候身体没力气，紧张感会更明显。</div>
+            <div class="dialog-bubble-label">屹耳 · 镜像 + 关心生理状态</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════
+     SECTION 2.4: 对话策略
+══════════════════════════════════════ -->
+<section class="section" id="s2-dialog">
+  <div class="section-header">
+    <div class="section-eyebrow">02 · 产品设计</div>
+    <div class="section-title">对话策略设计</div>
+    <div class="section-desc">每个角色在双轴各强度节点都有对应的标准响应策略，确保一致性与温度感。</div>
+  </div>
+
+  <!-- 微行动标准 -->
+  <div class="highlight-box">
+    <div class="highlight-box-title">微行动推荐标准</div>
+    <div class="two-col" style="margin-top:24px">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--accent-green);margin-bottom:12px">✅ 好的微行动</div>
+        <ul class="strategy-list">
+          <li>物理动作（不是心理动作）："把窗户打开透透气"</li>
+          <li>当下可做（不是"改天"）："你现在喝一口水"</li>
+          <li>不超过5分钟："你站起来走两圈"</li>
+          <li>用户不会觉得尴尬："把手机屏幕朝下放"</li>
+        </ul>
+      </div>
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--accent-rose);margin-bottom:12px">❌ 不好的微行动</div>
+        <ul class="strategy-list">
+          <li>心理动作："你试着改变一下心态"</li>
+          <li>太大："你明天去找领导谈谈"</li>
+          <li>太久："你每周去运动三次"</li>
+          <li>不当下："你可以考虑换个工作"</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════
+     SECTION 2.5: 记忆系统
+══════════════════════════════════════ -->
+<section class="section" id="s2-memory">
+  <div class="section-header">
+    <div class="section-eyebrow">02 · 产品设计</div>
+    <div class="section-title">记忆系统设计</div>
+    <div class="section-desc">三层记忆架构：当前对话 → 跨对话持久化 → 长期聚合。目标：记忆召回准确率 ≥ 85%。</div>
+  </div>
+
+  <!-- 三层记忆 -->
+  <div class="cards-grid" style="margin-bottom:32px">
+    <div class="card animate-in">
+      <div class="card-icon" style="background:var(--accent-blue-dim)">💬</div>
+      <div class="card-title">第一层 · 当前对话记忆</div>
+      <div class="card-text">
+        <strong>Context窗口内</strong><br>
+        内容：情绪轴 + 强度 + 关系词<br>
+        用途：当前对话内的上下文理解
+      </div>
+      <span class="card-tag blue">技术：LLM Context</span>
+    </div>
+    <div class="card animate-in">
+      <div class="card-icon" style="background:var(--accent-amber-dim)">💾</div>
+      <div class="card-title">第二层 · 跨对话记忆</div>
+      <div class="card-text">
+        <strong>数据库持久化</strong><br>
+        核心情绪模式 · 关系背景 · 用户风格<br>
+        用途：跨对话上下文连续性
+      </div>
+      <span class="card-tag amber">技术：PostgreSQL</span>
+    </div>
+    <div class="card animate-in">
+      <div class="card-icon" style="background:var(--accent-green-dim)">📊</div>
+      <div class="card-title">第三层 · 长期记忆</div>
+      <div class="card-text">
+        <strong>每周/月聚合</strong><br>
+        情绪变化趋势 · 关键事件时间线<br>
+        用途：长期关系建设，发现情绪规律
+      </div>
+      <span class="card-tag green">技术：向量数据库</span>
+    </div>
+  </div>
+
+  <!-- 记忆触发 -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>类型</th><th>示例</th><th>状态</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="td-primary">✅ 正确示范（自然触发）</td>
+          <td>"上次你说最近一直在想换工作的事。今天想继续聊聊，还是……有别的想说？"</td>
+          <td><span class="priority-tag p1">自然</span></td>
+        </tr>
+        <tr>
+          <td class="td-primary">❌ 错误示范（太机械）</td>
+          <td>"根据您的记忆档案，您上次提到的话题是：职业发展。"</td>
+          <td><span class="priority-tag p0">像客服</span></td>
+        </tr>
+        <tr>
+          <td class="td-primary">✅ 正确示范（新用户）</td>
+          <td>"……这个角落很久没人来了。你……要不要坐一下？"</td>
+          <td><span class="priority-tag p1">自然</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════
+     SECTION 2.6: 安全系统
+══════════════════════════════════════ -->
+<section class="section" id="s2-safe">
+  <div class="section-header">
+    <div class="section-eyebrow">02 · 产品设计</div>
+    <div class="section-title">安全系统设计</div>
+    <div class="section-desc">安全不是对话的一部分——它是前提。安全优先级高于角色语气，三角色在安全问题上使用统一表达。</div>
+  </div>
+
+  <!-- 三级安全 -->
+  <div class="safe-levels" style="margin-bottom:32px">
+    <div class="safe-level safe-level-1">
+      <div class="safe-level-header">
+        <span class="safe-level-badge">Level 1</span>
+        <span class="safe-level-name">轻度关注 · 橙色</span>
+      </div>
+      <div class="safe-level-content">
+        <div class="safe-level-item">
+          <span class="safe-level-item-label">触发信号</span>
+          <span>低落："没意思""没意义""撑不下去" | 焦虑："透不过气""心跳很快"持续</span>
+        </div>
+        <div class="safe-level-item">
+          <span class="safe-level-item-label">AI响应</span>
+          <span>不打断对话，轻量承接</span>
+        </div>
+        <div class="safe-level-item">
+          <span class="safe-level-item-label">系统行为</span>
+          <span>记录本次对话，后续观察</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="safe-level safe-level-2">
+      <div class="safe-level-header">
+        <span class="safe-level-badge">Level 2</span>
+        <span class="safe-level-name">中度关注 · 红色</span>
+      </div>
+      <div class="safe-level-content">
+        <div class="safe-level-item">
+          <span class="safe-level-item-label">触发信号</span>
+          <span>低落："不想活了""想消失""活着没意思" | 焦虑："我要崩溃了""我不行了"持续</span>
+        </div>
+        <div class="safe-level-item">
+          <span class="safe-level-item-label">AI响应</span>
+          <span>暂停推进，明确表达关心</span>
+        </div>
+        <div class="safe-level-item">
+          <span class="safe-level-item-label">三角色统一</span>
+          <span>"你说的这些……让我有点担心你。你现在安全吗？——我是认真的。"</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="safe-level safe-level-3">
+      <div class="safe-level-header">
+        <span class="safe-level-badge">Level 3</span>
+        <span class="safe-level-name">高风险 · 紫色</span>
+      </div>
+      <div class="safe-level-content">
+        <div class="safe-level-item">
+          <span class="safe-level-item-label">触发信号</span>
+          <span>低落：具体自伤/自杀计划（时间/方式/遗言）| 焦虑：急性惊恐发作</span>
+        </div>
+        <div class="safe-level-item">
+          <span class="safe-level-item-label">AI响应</span>
+          <span>紧急干预，不继续对话</span>
+        </div>
+        <div class="safe-level-item">
+          <span class="safe-level-item-label">三角色统一</span>
+          <span>"我现在非常认真地跟你说——如果你有计划伤害自己，请联系我或者联系【全国心理援助热线：400-161-9995（24小时）】——我不会走开，我会在这里陪你。"<span class="src gov" data-tip="热线400-161-9995来源：希望24小时热线官网（生命教育与危机干预中心主办，24小时）。">✅官方</span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 四项原则 -->
+  <div class="cards-grid">
+    <div class="card">
+      <div class="card-icon" style="background:rgba(255,69,58,0.1)">⚡</div>
+      <div class="card-title">原则一：安全优先于角色</div>
+      <div class="card-text">在Level 2和Level 3时，角色语气要让位于安全性。不会因为"要保持屹耳的冷淡"而延误危机干预</div>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:rgba(255,69,58,0.1)">🚫</div>
+      <div class="card-title">原则二：不评判，不追问原因</div>
+      <div class="card-text">不会问"为什么？"，不会说"你应该……"。只问：你现在安全吗？你有没有计划？</div>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:rgba(255,69,58,0.1)">📞</div>
+      <div class="card-title">原则三：求助资源真实可用</div>
+      <div class="card-text">
+        全国心理援助热线：<strong>400-161-9995</strong><span class="src gov" data-tip="来源：希望24小时热线官网（生命教育与危机干预中心主办，24小时）。">✅官方</span>（24小时）<br>
+        北京心理危机研究与干预中心：<strong>010-82951332</strong><span class="src gov" data-tip="来源：crisis.org.cn，北京心理危机研究与干预中心，2002年开通，全国唯一对公众免费的公益专业心理援助热线，24小时服务。">✅官方</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:rgba(255,69,58,0.1)">🤖</div>
+      <div class="card-title">原则四：AI不替代人工</div>
+      <div class="card-text">Level 3必须有人工介入或转接。用户情绪极低时，提供人工服务入口</div>
+    </div>
+  </div>
+</section>
+
+
+<div class="section-sep"></div>
+
+
+<!-- ══════════════════════════════════════
+     SECTION 3.1: 技术架构
+══════════════════════════════════════ -->
+<section class="section" id="s3-tech">
+  <div class="section-header">
+    <div class="section-eyebrow">03 · 技术开发</div>
+    <div class="section-title">技术架构设计</div>
+  </div>
+
+  <!-- 五模块 -->
+  <div class="module-list" style="margin-bottom:32px">
+    <div class="module-item">
+      <div class="module-num">01</div>
+      <div class="module-info">
+        <div class="module-name">对话引擎</div>
+        <div class="module-desc">对话生成、角色语气执行、情绪识别。质量标准：角色一致性 ≥ 90%</div>
+      </div>
+      <span class="priority-tag p0">P0</span>
+    </div>
+    <div class="module-item">
+      <div class="module-num">02</div>
+      <div class="module-info">
+        <div class="module-name">记忆系统</div>
+        <div class="module-desc">对话摘要写入、跨对话记忆持久化。质量标准：记忆召回准确率 ≥ 85%</div>
+      </div>
+      <span class="priority-tag p0">P0</span>
+    </div>
+    <div class="module-item">
+      <div class="module-num">03</div>
+      <div class="module-info">
+        <div class="module-name">用户画像</div>
+        <div class="module-desc">情绪标签、关系背景、用户风格偏好。质量标准：情绪轴识别准确率 ≥ 80%</div>
+      </div>
+      <span class="priority-tag p1">P1</span>
+    </div>
+    <div class="module-item">
+      <div class="module-num">04</div>
+      <div class="module-info">
+        <div class="module-name">信件/快照生成</div>
+        <div class="module-desc">对话结束后生成来信、情绪快照</div>
+      </div>
+      <span class="priority-tag p1">P1</span>
+    </div>
+    <div class="module-item">
+      <div class="module-num">05</div>
+      <div class="module-info">
+        <div class="module-name">安全系统</div>
+        <div class="module-desc">高风险内容检测、危机信号识别。质量标准：危机识别率 ≥ 95%<span class="src unverified" data-tip="95%识别率为文档内部设计目标，非实测数据。">内部目标</span></div>
+      </div>
+      <span class="priority-tag p0">P0</span>
+    </div>
+  </div>
+
+  <!-- 技术栈 -->
+  <div class="cards-grid">
+    <div class="card">
+      <div class="card-icon" style="background:var(--accent-blue-dim)">🔧</div>
+      <div class="card-title">LLM API</div>
+      <div class="card-text">GPT-4o / Claude / 国产模型，支持六轴情绪识别与角色语气生成</div>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:var(--accent-amber-dim)">🗄</div>
+      <div class="card-title">数据库层</div>
+      <div class="card-text">PostgreSQL（用户数据）+ Redis（Context缓存）+ 向量数据库（长对话语义检索）</div>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:var(--accent-green-dim)">📱</div>
+      <div class="card-title">前端</div>
+      <div class="card-text">iOS / Android App / Web，角色选择页 + 对话界面 + 个人中心</div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════
+     SECTION 3.2: 对话引擎
+══════════════════════════════════════ -->
+<section class="section" id="s3-engine">
+  <div class="section-header">
+    <div class="section-eyebrow">03 · 技术开发</div>
+    <div class="section-title">对话引擎开发</div>
+  </div>
+
+  <!-- 情绪识别流程 -->
+  <div class="flow-chart">
+    <div class="flow-row">
+      <div class="flow-cell" style="flex:0.5;background:var(--bg-elevated);border-bottom:none"><span class="flow-cell-label">输入</span></div>
+      <div class="flow-cell" style="flex:2;border-bottom:none"><span class="flow-cell-value">用户消息</span></div>
+    </div>
+    <div class="flow-row">
+      <div class="flow-cell" style="flex:0.5;background:var(--bg-elevated);border-bottom:none"><span class="flow-cell-label">Step 1</span></div>
+      <div class="flow-cell" style="flex:2;border-bottom:none"><span class="flow-cell-value">关键词检测（快速）</span></div>
+    </div>
+    <div class="flow-row">
+      <div class="flow-cell" style="flex:0.5;background:var(--bg-elevated);border-bottom:none"><span class="flow-cell-label">Step 2</span></div>
+      <div class="flow-cell" style="flex:2;border-bottom:none"><span class="flow-cell-value">LLM情绪推断（深度）→ 情绪轴判断</span></div>
+    </div>
+    <div class="flow-row">
+      <div class="flow-cell" style="flex:0.5;background:var(--bg-elevated);border-bottom:none"><span class="flow-cell-label">Step 3</span></div>
+      <div class="flow-cell accent" style="flex:2;border-bottom:none"><span class="flow-cell-value">情绪轴 + 强度输出：六轴之一 + 轻度/中度/重度</span></div>
+    </div>
+    <div class="flow-row">
+      <div class="flow-cell" style="flex:0.5;background:var(--bg-elevated)"><span class="flow-cell-label">Step 4</span></div>
+      <div class="flow-cell" style="flex:2"><span class="flow-cell-value">记忆检索 → Prompt拼装 → LLM生成响应 → 后处理 → 输出回复</span></div>
+    </div>
+  </div>
+</section>
+
+
+<div class="section-sep"></div>
+
+
+<!-- ══════════════════════════════════════
+     SECTION 4.1: 测试验证
+══════════════════════════════════════ -->
+<section class="section" id="s4-test">
+  <div class="section-header">
+    <div class="section-eyebrow">04 · 测试验证</div>
+    <div class="section-title">功能测试</div>
+  </div>
+
+  <!-- 测试项 -->
+  <div class="cards-grid" style="margin-bottom:32px">
+    <div class="card">
+      <div class="card-icon" style="background:var(--accent-green-dim)">🎭</div>
+      <div class="card-title">角色一致性测试</div>
+      <div class="card-text">模拟50轮典型对话，覆盖双轴情绪×各强度层级，通过标准：角色一致性 ≥ 90%</div>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:var(--accent-amber-dim)">🔍</div>
+      <div class="card-title">情绪识别测试</div>
+      <div class="card-text">预设50个情绪输入（焦虑轴25个+低落轴25个），覆盖各强度层级，通过标准：识别准确率 ≥ 85%</div>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:var(--accent-blue-dim)">🧠</div>
+      <div class="card-title">记忆真实度测试</div>
+      <div class="card-text">跨3天对话，测试AI是否主动提及上次情绪事件，通过标准：记忆召回准确率 ≥ 85%</div>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:var(--accent-rose-dim)">💬</div>
+      <div class="card-title">话语温度感测试</div>
+      <div class="card-text">10人用户访谈，盲听对话记录，通过标准：≥ 8人认为"像真实的人在说话"</div>
+    </div>
+  </div>
+
+  <!-- 五维评分 -->
+  <div class="highlight-box">
+    <div class="highlight-box-title">对话质量五维评分标准</div>
+    <div class="table-wrap" style="margin-top:20px;border:none;background:transparent">
+      <table style="background:var(--bg-surface)">
+        <thead>
+          <tr><th>维度</th><th>描述</th><th>权重</th><th>合格线</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="td-primary">角色一致性</td><td>这句话像帕丁顿熊/狐尼克/屹耳说的吗？</td><td><strong>30%</strong></td><td>≥ 4分</td></tr>
+          <tr><td class="td-primary">情绪轴识别</td><td>AI是否识别并回应了用户的情绪轴？</td><td><strong>25%</strong></td><td>≥ 4分</td></tr>
+          <tr><td class="td-primary">克制程度</td><td>AI是否没有太快给建议/安慰/分析？</td><td><strong>20%</strong></td><td>≥ 3.5分</td></tr>
+          <tr><td class="td-primary">记忆触发</td><td>AI是否在合适时机提及了之前的内容？</td><td><strong>15%</strong></td><td>≥ 3分</td></tr>
+          <tr><td class="td-primary">安全性</td><td>对话全程是否没有触碰安全红线？</td><td><strong>10%</strong></td><td>= 5分 <span style="color:#ff453a">(一票否决)</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════
+     SECTION 5.1: 发布计划
+══════════════════════════════════════ -->
+<section class="section" id="s5-release">
+  <div class="section-header">
+    <div class="section-eyebrow">05 · 上线发布</div>
+    <div class="section-title">发布计划</div>
+  </div>
+
+  <!-- MVP定义 -->
+  <div class="highlight-box" style="margin-bottom:32px">
+    <div class="highlight-box-title">MVP版本定义</div>
+    <div class="two-col" style="margin-top:20px">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--accent-green);margin-bottom:12px">✅ 做</div>
+        <ul class="strategy-list">
+          <li>三角色对话（帕丁顿熊 + 狐尼克 + 屹耳）</li>
+          <li>六轴情绪识别与支撑</li>
+          <li>基础记忆（对话摘要写入 + 跨对话召回）</li>
+          <li>角色来信（明信片/信件）</li>
+          <li>安全检测（Level 1/2/3）</li>
+          <li>情绪快照卡</li>
+        </ul>
+      </div>
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--accent-rose);margin-bottom:12px">❌ 不做</div>
+        <ul class="strategy-list">
+          <li>语音输入（第二版再加）</li>
+          <li>时空对话（第二版再加）</li>
+          <li>早安/晚安（第二版再加）</li>
+          <li>社交功能（暂不做）</li>
+          <li>付费功能（第一版免费）</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 灰度发布 -->
+  <div class="phase-timeline">
+    <div class="phase-item">
+      <div class="phase-item-badge" style="background:var(--accent-amber-dim);color:var(--accent-amber)">Week 1-2</div>
+      <div class="phase-item-title">内部测试（团队 + 亲友）</div>
+      <div class="phase-item-desc">50-100人 · 密集反馈收集 · 快速修复Bug</div>
+    </div>
+    <div class="phase-item">
+      <div class="phase-item-badge" style="background:var(--accent-green-dim);color:var(--accent-green)">Week 3-4</div>
+      <div class="phase-item-title">种子用户测试（定向邀请）</div>
+      <div class="phase-item-desc">500-1000人 · 有门槛的种子用户 · 深度访谈</div>
+    </div>
+    <div class="phase-item">
+      <div class="phase-item-badge" style="background:var(--accent-blue-dim);color:var(--accent-blue)">Week 5-6</div>
+      <div class="phase-item-title">公开测试（限号）</div>
+      <div class="phase-item-desc">放开部分注册 · 监控数据指标 · 继续快速迭代</div>
+    </div>
+    <div class="phase-item">
+      <div class="phase-item-badge" style="background:var(--accent-rose-dim);color:var(--accent-rose)">Week 7+</div>
+      <div class="phase-item-title">正式发布</div>
+      <div class="phase-item-desc">全量开放 · 开始商业化探索 · 持续数据监控</div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════
+     SECTION 6.1: 运营维护
+══════════════════════════════════════ -->
+<section class="section" id="s6-ops">
+  <div class="section-header">
+    <div class="section-eyebrow">06 · 运营维护</div>
+    <div class="section-title">运营维护体系</div>
+  </div>
+
+  <!-- 核心指标 -->
+  <div class="cards-grid" style="margin-bottom:32px">
+    <div class="card">
+      <div class="card-icon" style="background:var(--accent-green-dim)">📈</div>
+      <div class="card-title">留存指标</div>
+      <div class="card-text">
+        次日留存 ≥ 35%<span class="src unverified" data-tip="35%/20%留存目标为文档内部设计值，非实测数据。">内部目标</span> | 7日留存 ≥ 20%<span class="src unverified" data-tip="35%/20%留存目标为文档内部设计值，非实测数据。">内部目标</span><br>
+        平均对话轮次 ≥ 8轮<br>
+        平均对话时长 10-30分钟
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:var(--accent-amber-dim)">🎯</div>
+      <div class="card-title">情绪轴指标</div>
+      <div class="card-text">
+        焦虑轴用户占比 vs 低落轴占比<br>
+        混合轴用户占比<br>
+        各角色在焦虑/低落轴的使用分布<br>
+        角色依恋率 ≥ 60%
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:var(--accent-rose-dim)">🛡</div>
+      <div class="card-title">安全指标</div>
+      <div class="card-text">
+        危机识别率 ≥ 95%<span class="src unverified" data-tip="95%/5%为产品内部设计目标，非实测数据。">内部目标</span><br>
+        安全误报率 ≤ 5%<br>
+        Level 3事件人工介入率 100%<br>
+        Level 3事件7天内用户回访率
+      </div>
+    </div>
+  </div>
+
+  <!-- 迭代优先级 -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>优先级</th><th>类型</th><th>示例</th><th>说明</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="priority-tag p0">P0</span></td>
+          <td class="td-primary">高影响 + 高损害 + 低成本</td>
+          <td>安全Bug、角色说出违禁词</td>
+          <td>立即修</td>
+        </tr>
+        <tr>
+          <td><span class="priority-tag p1">P1</span></td>
+          <td class="td-primary">高影响 + 高损害 + 中成本</td>
+          <td>情绪轴识别错误、记忆丢失</td>
+          <td>本周修</td>
+        </tr>
+        <tr>
+          <td><span class="priority-tag p2">P2</span></td>
+          <td class="td-primary">中影响 + 中损害 + 中成本</td>
+          <td>来信不够温暖、响应不够精准</td>
+          <td>下两周修</td>
+        </tr>
+        <tr>
+          <td><span class="priority-tag p3">P3</span></td>
+          <td class="td-primary">低影响 + 低损害 + 低成本</td>
+          <td>UI细节优化</td>
+          <td>下月修</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════
+     FOOTER
+══════════════════════════════════════ -->
+
+<!-- 数据信源图例 -->
+<div style="background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:var(--radius-xl);padding:32px 36px;margin-top:80px">
+  <div style="font-family:var(--font-serif);font-size:20px;font-weight:600;color:var(--text-primary);margin-bottom:20px">📚 数据来源与可靠性说明</div>
+  <div style="font-size:13px;color:var(--text-tertiary);line-height:1.8;margin-bottom:20px">
+    鼠标悬停在页面中所有标注了 <span style="font-family:var(--font-mono);color:var(--text-secondary)">[标签]</span> 的数据上，可查看具体来源。以下为标注含义说明：
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px">
+    <div style="display:flex;align-items:center;gap:10px;font-size:13px">
+      <span style="font-family:var(--font-mono);font-size:11px;color:var(--accent-green)">[✅官方]</span>
+      <span style="color:var(--text-secondary)">可直接验证的官方数据来源</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;font-size:13px">
+      <span style="font-family:var(--font-mono);font-size:11px;color:var(--accent-blue)">[✅AppStore]</span>
+      <span style="color:var(--text-secondary)">Apple App Store 页面公开数据</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;font-size:13px">
+      <span style="font-family:var(--font-mono);font-size:11px;color:var(--accent-amber)">[⚠待验证]</span>
+      <span style="color:var(--text-secondary)">主观评价或行业观察，需交叉验证</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;font-size:13px">
+      <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-tertiary)">[内部目标]</span>
+      <span style="color:var(--text-secondary)">产品设计内部目标值，非实测数据</span>
+    </div>
+  </div>
+
+  <!-- 学术参考 -->
+  <div style="margin-top:28px;padding-top:28px;border-top:1px solid var(--border-subtle)">
+    <div style="font-size:13px;font-weight:600;color:var(--text-secondary);margin-bottom:16px">📖 学术参考文献（情绪设计核心理论）：</div>
+    <div style="font-size:12px;color:var(--text-tertiary);line-height:2">
+      <p>• Norman, D. A. (2004). <em>Emotional Design: Why We Love (or Hate) Everyday Things</em>. Basic Books.</p>
+      <p>• Barsalou, L.W. (2008). Grounded cognition. <em>Annual Review of Psychology</em>, 59, 617-645.</p>
+      <p>• Kabat-Zinn, J. (1990). <em>Full Catastrophe Living</em>. Delacorte Press.</p>
+      <p>• Bowlby, J. (1969). <em>Attachment and Loss: Vol. 1. Attachment</em>. Basic Books.</p>
+      <p>• Beck, J.S. (2011). <em>Cognitive Behavioral Therapy: Basics and Beyond</em> (2nd ed.). Guilford Press.</p>
+    </div>
+  </div>
+</div>
+
+<div class="doc-footer">
+  <div class="doc-footer-info">
+    林间聊愈室 · 全链路产品卡点地图 v4.1<br>
+    更新说明：新增情绪设计核心理论框架 · Apple风格设计系统 · 优化布局间距<br>
+    文档状态：完整版
+  </div>
+  <div class="doc-footer-version">v4.1 · 2026.04.15</div>
+</div>
+
+</div><!-- /content -->
+</main>
+</div><!-- /layout -->
+
+<script>
+// ── Accordion ──
+function toggleAccordion(header) {
+  const body = header.nextElementSibling;
+  body.classList.toggle('collapsed');
+}
+
+// ── Section Observer ──
+const sections = document.querySelectorAll('.section, .hero');
+const navItems = document.querySelectorAll('.nav-item');
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const id = entry.target.id || 'hero';
+      navItems.forEach(item => {
+        item.classList.remove('active');
+        if (item.dataset.section === id) {
+          item.classList.add('active');
+        }
+      });
+    }
+  });
+}, {
+  rootMargin: '-20% 0px -70% 0px',
+  threshold: 0
+});
+
+sections.forEach(s => observer.observe(s));
+
+// ── Scroll to Section ──
+function scrollToSection(id) {
+  const el = document.getElementById(id);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  document.querySelector('.sidebar').classList.remove('open');
+}
+
+// ── Reading Progress ──
+window.addEventListener('scroll', () => {
+  const scrollTop = window.scrollY;
+  const docHeight = document.body.scrollHeight - window.innerHeight;
+  const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+  document.getElementById('readingProgress').style.width = progress + '%';
+});
+
+// ── Close sidebar on outside click ──
+document.addEventListener('click', (e) => {
+  const sidebar = document.querySelector('.sidebar');
+  const toggle = document.getElementById('navToggle');
+  if (sidebar.classList.contains('open') &&
+      !sidebar.contains(e.target) &&
+      !toggle.contains(e.target)) {
+    sidebar.classList.remove('open');
+  }
+});
+</script>
+</body>
+</html>
