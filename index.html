@@ -270,14 +270,25 @@
     }
 
     /* Source modal link highlight */
-    a.src {
-      color: var(--accent); text-decoration: none; cursor: pointer;
-      font-size: 13px; display: inline-flex; align-items: center; gap: 5px;
-      padding: 6px 12px; border-radius: 8px; border: 1px solid #c8dfb8;
-      background: #f0f7ec; transition: all .2s; font-weight: 500;
+    /* Source link cards */
+    .source-grid { display: flex; flex-direction: column; gap: 8px; padding: 4px 0; }
+    .source-card {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 14px; border-radius: 10px;
+      border: 1px solid var(--border); background: var(--bg);
+      text-decoration: none; color: var(--text);
+      transition: all .2s; cursor: pointer;
     }
-    a.src:hover { background: #dff0d5; border-color: var(--accent); transform: translateY(-1px); box-shadow: 0 2px 8px rgba(122,158,107,.2); }
-    a.src::before { content: '🔗'; }
+    .source-card:hover {
+      border-color: var(--accent); background: #f0f7ec;
+      transform: translateY(-1px); box-shadow: 0 4px 16px rgba(122,158,107,.15);
+    }
+    .source-card-icon { font-size: 18px; flex-shrink: 0; }
+    .source-card-body { flex: 1; min-width: 0; }
+    .source-card-title { display: block; font-size: 13px; font-weight: 500; color: var(--text2); line-height: 1.4; }
+    .source-card-url { display: block; font-size: 11px; color: var(--text-light); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .source-card-arrow { font-size: 14px; color: var(--accent); flex-shrink: 0; }
+    .source-note { font-size: 13px; color: var(--text2); padding: 8px 12px; background: #fff8e6; border-radius: 8px; border: 1px solid #f0d7a0; line-height: 1.5; }
 
     /* Slide transition */
     .fade-in { animation: fadeIn .3s ease; }
@@ -1653,26 +1664,32 @@ function renderChapter(id) {
     const badgeText = secDone === secTotal && secTotal > 0 ? '已完成' : `${secDone}/${secTotal}`;
 
     html += `<div class="section-card">
-      <div class="section-header" onclick="toggleSection(this)">
-        <span class="section-toggle">▶</span>
+      <div class="section-header open" onclick="toggleSection(this)">
+        <span class="section-toggle">▼</span>
         <span class="section-title">${sec.title}</span>
         <span class="section-badge ${badgeClass}">${badgeText}</span>
       </div>
       <div class="section-body open">
         <div class="section-intro">`;
 
-    // If source section
+    // If source section - beautiful clickable link cards
     if (sec.showAsSource && sec.sources) {
-      html += `<p style="font-size:12px;color:var(--text-light);margin-bottom:10px;">📎 点击以下信源链接可跳转到原始来源：</p>`;
+      html += `<div class="source-grid">`;
       sec.sources.forEach(src => {
         if (src.url) {
-          html += `<div style="margin-bottom:8px;">
-            <a class="src" href="${src.url}" target="_blank" rel="noopener">${src.title}</a>
-          </div>`;
+          html += `<a class="source-card" href="${src.url}" target="_blank" rel="noopener noreferrer">
+            <span class="source-card-icon">🔗</span>
+            <span class="source-card-body">
+              <span class="source-card-title">${src.title}</span>
+              <span class="source-card-url">${src.url}</span>
+            </span>
+            <span class="source-card-arrow">↗</span>
+          </a>`;
         } else {
-          html += `<div style="margin-bottom:6px;font-size:12px;color:var(--text2);">${src.title}</div>`;
+          html += `<div class="source-note">${src.title}</div>`;
         }
       });
+      html += `</div>`;
     } else {
       sec.tasks.forEach(task => {
         const done = getTaskState(task.id);
