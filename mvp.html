@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>林间聊愈室 · 全流程与最小 MVP</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    :root { --bg1:#f7fbff; --bg2:#f3f7fb; --card:rgba(255,255,255,.84); --text:#1f2937; --muted:#6b7280; --line:rgba(148,163,184,.18); --shadow:0 18px 50px rgba(15,23,42,.08); --blue:#6b8fd6; --green:#64b894; --orange:#d79a63; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;color:var(--text);background:radial-gradient(circle at top left, rgba(107,143,214,0.10), transparent 34%),radial-gradient(circle at top right, rgba(100,184,148,0.10), transparent 30%),linear-gradient(180deg,var(--bg1),var(--bg2));min-height:100vh}
+    .page{width:min(1500px, calc(100vw - 40px));margin:24px auto 40px}
+    .header{padding:26px 28px 22px;border-radius:24px;border:1px solid var(--line);background:var(--card);backdrop-filter:blur(16px);box-shadow:var(--shadow)}
+    h1{margin:0 0 10px;font-size:34px;line-height:1.2;letter-spacing:-0.02em}
+    .desc{margin:0;color:var(--muted);line-height:1.75;font-size:15px}
+    .chips{margin-top:18px;display:flex;gap:10px;flex-wrap:wrap}
+    .chip{display:inline-flex;align-items:center;padding:8px 14px;border-radius:999px;background:#fff;border:1px solid var(--line);box-shadow:0 6px 18px rgba(15,23,42,.04);font-size:13px;font-weight:700}
+    .chip.blue{color:var(--blue)} .chip.green{color:var(--green)} .chip.orange{color:var(--orange)}
+    .section{margin-top:18px;padding:20px;border-radius:24px;border:1px solid var(--line);background:rgba(255,255,255,.72);box-shadow:var(--shadow)}
+    .section-title{margin:0 0 12px;font-size:22px;font-weight:800;letter-spacing:-0.01em}
+    .section-subtitle{margin:0 0 18px;color:var(--muted);line-height:1.75;font-size:14px}
+    .panel{overflow:hidden;border-radius:18px;background:#fff;border:1px solid var(--line);padding:12px}
+    .zoom-board{position:relative;height:640px;border-radius:14px;background:#fcfdff;border:1px dashed #dbe7fb;overflow:hidden;cursor:grab;user-select:none}
+    .zoom-board:active{cursor:grabbing}
+    .zoom-content{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform}
+    .mermaid{min-width:1200px;background:white;padding:8px}
+    .board-tip{margin-top:10px;font-size:12px;color:#64748b;text-align:center}
+    .report{display:grid;gap:14px}
+    .card-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    .info-card{padding:18px 18px 16px;border-radius:18px;background:#fff;border:1px solid var(--line);box-shadow:0 8px 24px rgba(15,23,42,.04)}
+    .info-card h3{margin:0 0 10px;font-size:18px;line-height:1.35}
+    .info-card p,.info-card li{margin:0;color:#374151;line-height:1.75;font-size:14px}
+    .info-card ul{margin:0;padding-left:18px;display:grid;gap:6px}
+    .badge{display:inline-flex;align-items:center;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:700;margin-bottom:10px;background:#f7fafc;color:#334155;border:1px solid var(--line)}
+    .badge.blue{color:var(--blue)} .badge.green{color:var(--green)} .badge.orange{color:var(--orange)}
+    .footer-note{margin-top:14px;text-align:center;color:var(--muted);font-size:13px}
+    @media (max-width:900px){.card-row{grid-template-columns:1fr} h1{font-size:28px} .zoom-board{height:540px}}
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="header">
+      <h1>林间聊愈室 · 全流程与最小 MVP</h1>
+      <p class="desc">这个页面包含三部分内容：<br>1. 全流程 Mermaid 图<br>2. 最小 MVP 报告<br>3. 最小 MVP 的 Mermaid 图<br>目标是帮助你快速确认产品全局结构，以及 MVP 阶段应该优先做什么。</p>
+      <div class="chips"><span class="chip blue">全流程图</span><span class="chip green">最小 MVP 报告</span><span class="chip orange">最小 MVP Mermaid 图</span></div>
+    </div>
+    <div class="section">
+      <h2 class="section-title">一、全流程 Mermaid 图</h2>
+      <p class="section-subtitle">包含用户入口、前端页面、后端 / AI 三层结构，以及四条功能链路。</p>
+      <div class="panel"><div class="zoom-board" id="zoomBoard"><div class="zoom-content" id="zoomContent"><div class="mermaid">
+flowchart LR
+  subgraph U["用户泳道"]
+    U1["进入 App"] --> U2{"选择入口"}
+    U2 -->|"聊愈"| U3A["发起深度对话"]
+    U2 -->|"碎念"| U3B["发布轻量碎片"]
+    U2 -->|"日记"| U3C["查看自动沉淀"]
+    U2 -->|"人格星图"| U3D["查看人格解读"]
+  end
+
+  subgraph UI["UI 泳道"]
+    UI0["首页 UI"] --> UI1["入口卡片 UI"]
+    UI1 --> UI2A["聊愈页 UI<br/>伙伴选择 / 输入框 / 对话气泡 / 建议卡 / 安全提示"]
+    UI1 --> UI2B["碎念页 UI<br/>动态流 / 发帖入口 / 互动 / 私人朋友圈"]
+    UI1 --> UI2C["日记页 UI<br/>时间轴 / 自动总结 / 情绪曲线 / 周报"]
+    UI1 --> UI2D["星图页 UI<br/>人格星图 / 解读卡 / 变化趋势"]
+    UI2A --> UI3A["展示 AI 回复 / 情绪标签 / 建议卡"]
+    UI2B --> UI3B["展示互动回复 / 动态沉淀"]
+    UI2C --> UI3C["展示摘要 / 曲线 / 周报"]
+    UI2D --> UI3D["展示人格图谱 / 解读结果"]
+  end
+
+  subgraph B["后端 / AI 泳道"]
+    B1["接收聊愈输入"] --> B2["语音转文字 / 文本清洗"]
+    B2 --> B3["意图识别 + 情绪识别"]
+    B3 --> B4{"情绪是否高危"}
+    B4 -->|"否"| B5["选择对话策略"]
+    B4 -->|"是"| B9["安全风控 / 风险拦截 / 求助引导"]
+    B5 --> B6["调用大模型生成回复"]
+    B6 --> B7["写入对话记忆"]
+    B7 --> B8["生成日记摘要 / 周报数据 / 星图数据"]
+
+    B10["接收碎念发布"] --> B11["轻量内容理解"]
+    B11 --> B12["生成陪伴式回应"]
+    B12 --> B13["沉淀为碎念动态记录"]
+
+    B14["读取日记请求"] --> B15["聚合历史对话 / 碎念 / 行为数据"]
+    B15 --> B16["生成时间线 / 情绪曲线 / 周报"]
+
+    B17["读取星图请求"] --> B18["汇总长期画像 / 对话模式 / 情绪偏好"]
+    B18 --> B19["生成人格星图 / 解释文案"]
+  end
+
+  U3A --> UI2A
+  U3B --> UI2B
+  U3C --> UI2C
+  U3D --> UI2D
+  UI2A --> B1
+  UI2B --> B10
+  UI2C --> B14
+  UI2D --> B17
+  B6 --> UI3A
+  B7 --> UI3C
+  B8 --> UI3C
+  B9 --> UI3A
+  B12 --> UI3B
+  B13 --> UI3B
+  B16 --> UI3C
+  B19 --> UI3D
+</div></div></div><div class="board-tip">鼠标滚轮可放大/缩小，按住鼠标左键可拖动画板。双击可重置。</div></div>
+    </div>
+    <div class="section">
+      <h2 class="section-title">二、最小 MVP 报告</h2>
+      <p class="section-subtitle">最小 MVP 的核心目标，不是做全功能，而是先验证“用户在情绪上来时，是否愿意使用并且觉得被接住”。</p>
+      <div class="report">
+        <div class="card-row">
+          <div class="info-card"><div class="badge blue">P0 必做</div><h3>1. 聊愈主对话</h3><ul><li>用户输入文字</li><li>AI 返回回复</li><li>支持 1～2 个基础 AI 风格</li><li>支持基础情绪识别和安全兜底</li></ul></div>
+          <div class="info-card"><div class="badge green">P0 必做</div><h3>2. 情绪识别 + 策略回复</h3><ul><li>识别焦虑、低落、社恐、愤怒、委屈、高危</li><li>针对不同情绪调用不同策略</li><li>这是与普通聊天机器人的核心差异</li></ul></div>
+          <div class="info-card"><div class="badge orange">P1 建议一起做</div><h3>3. 自动日记</h3><ul><li>每次聊天自动生成摘要</li><li>记录本次情绪和关键触发点</li><li>支持历史回看</li></ul></div>
+          <div class="info-card"><div class="badge orange">P1 轻量版</div><h3>4. 基础记忆</h3><ul><li>记住用户上次说了什么</li><li>记住用户偏好的回应方式</li><li>先做短期记忆，不要一开始做复杂画像</li></ul></div>
+        </div>
+        <div class="info-card"><div class="badge blue">暂时不做</div><h3>不适合最小 MVP 的内容</h3><ul><li><strong>碎念</strong>：容易做成轻社交 / 动态流，功能链路复杂，建议先并入日记系统。</li><li><strong>人格星图</strong>：依赖大量历史数据，MVP 阶段很容易做虚。</li><li><strong>情绪周报 / 曲线 / 热力图</strong>：属于增强分析能力，可以后置。</li><li><strong>复杂角色系统</strong>：先验证 1～2 种风格即可，不必一开始做满。</li></ul></div>
+        <div class="info-card"><div class="badge green">建议顺序</div><h3>最小 MVP 的实施顺序</h3><ul><li><strong>第一阶段：</strong>聊天、情绪识别、基础回复、安全兜底、自动日记、短期记忆</li><li><strong>第二阶段：</strong>在验证有效后再加碎念、周报、曲线、更丰富的 AI 伙伴</li><li><strong>第三阶段：</strong>再做人格星图、长期画像、趋势分析、桌面组件</li></ul></div>
+      </div>
+    </div>
+    <div class="section">
+      <h2 class="section-title">三、最小 MVP 的 Mermaid 图</h2>
+      <p class="section-subtitle">这张图只保留最小验证链路：聊天、情绪识别、策略回复、自动日记、基础记忆、安全兜底。</p>
+      <div class="panel"><div class="zoom-board" id="zoomBoard2"><div class="zoom-content" id="zoomContent2"><div class="mermaid">
+flowchart LR
+  subgraph U["用户"]
+    U1["打开 App"] --> U2["进入首页"]
+    U2 --> U3["点击聊愈"]
+    U3 --> U4["输入情绪 / 问题"]
+    U4 --> U5["查看 AI 回复"]
+    U5 --> U6["查看自动日记"]
+    U6 --> U7["查看历史记录"]
+  end
+
+  subgraph UI["UI 层"]
+    UI1["首页 UI<br/>主入口 / 历史记录 / 安全说明"] --> UI2["聊愈页 UI<br/>伙伴头像 / 输入框 / 发送按钮"]
+    UI2 --> UI3["输入态 UI<br/>用户输入内容"]
+    UI3 --> UI4["思考态 UI<br/>loading / typing / 呼吸动画"]
+    UI4 --> UI5["回复态 UI<br/>情绪标签 / 建议卡 / 对话气泡"]
+    UI5 --> UI6["自动日记 UI<br/>摘要 / 触发点 / 建议"]
+    UI6 --> UI7["历史记录 UI<br/>时间线 / 卡片列表"]
+    UI5 --> UI8["安全提示 UI<br/>风险提示 / 求助入口"]
+  end
+
+  subgraph B["后端 / AI"]
+    B1["接收输入"] --> B2["文本清洗 / 语音转文字"]
+    B2 --> B3["情绪识别"]
+    B3 --> B4{"是否高危"}
+    B4 -->|"否"| B5["策略选择 + 回复生成"]
+    B4 -->|"是"| B9["安全兜底 / 求助引导"]
+    B5 --> B6["更新短期记忆"]
+    B5 --> B7["生成日记摘要"]
+    B7 --> B8["保存历史记录"]
+  end
+
+  U2 --> UI1
+  U3 --> UI2
+  U4 --> UI3
+  U5 --> UI5
+  U6 --> UI6
+  U7 --> UI7
+  UI3 --> B1
+  B5 --> UI5
+  B7 --> UI6
+  B8 --> UI7
+  B9 --> UI8
+</div></div></div><div class="board-tip">鼠标滚轮可放大/缩小，按住鼠标左键可拖动画板。双击可重置。</div></div>
+    </div>
+    <div class="footer-note">如果你愿意，我下一步可以把这版 HTML 直接改成更适合答辩展示的风格，或者继续补上“碎念 / 日记 / 人格星图”的单独页面。</div>
+  </div>
+  <script>
+    mermaid.initialize({startOnLoad:true,theme:"base",securityLevel:"loose",themeVariables:{fontFamily:'"PingFang SC","Microsoft YaHei",sans-serif',primaryColor:"#ffffff",primaryTextColor:"#1f2937",primaryBorderColor:"#dbe7fb",lineColor:"#94a3b8",secondaryColor:"#eef5ff",tertiaryColor:"#f8fbff"}});
+    function enableZoomBoard(boardId, contentId){const board=document.getElementById(boardId);const content=document.getElementById(contentId);if(!board||!content)return;let scale=1,x=0,y=0,isDragging=false,startX=0,startY=0,startLeft=0,startTop=0;function applyTransform(){content.style.transform=`translate(${x}px, ${y}px) scale(${scale})`;}function fit(){const cw=content.scrollWidth||1200;const ch=content.scrollHeight||700;const bw=board.clientWidth;const bh=board.clientHeight;scale=Math.min(1, Math.max(0.45, Math.min((bw-60)/cw, (bh-60)/ch)));x=Math.max(20,(bw-cw*scale)/2);y=Math.max(20,(bh-ch*scale)/2);applyTransform();}board.addEventListener('wheel',e=>{e.preventDefault();const rect=board.getBoundingClientRect();const mx=e.clientX-rect.left;const my=e.clientY-rect.top;const oldScale=scale;const delta=e.deltaY>0?-0.08:0.08;scale=Math.min(2.2,Math.max(0.45,scale+delta));x=mx-(mx-x)*(scale/oldScale);y=my-(my-y)*(scale/oldScale);applyTransform();},{passive:false});board.addEventListener('mousedown',e=>{isDragging=true;startX=e.clientX;startY=e.clientY;startLeft=x;startTop=y;});window.addEventListener('mousemove',e=>{if(!isDragging)return;x=startLeft+(e.clientX-startX);y=startTop+(e.clientY-startY);applyTransform();});window.addEventListener('mouseup',()=>{isDragging=false;});board.addEventListener('dblclick',()=>{scale=1;x=0;y=0;fit();});window.addEventListener('resize',fit);setTimeout(fit,300);applyTransform();}
+    enableZoomBoard('zoomBoard','zoomContent');
+    enableZoomBoard('zoomBoard2','zoomContent2');
+  </script>
+</body>
+</html>
